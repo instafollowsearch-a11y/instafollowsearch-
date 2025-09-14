@@ -3,6 +3,7 @@ import { useSubscription } from '../contexts/SubscriptionContext';
 import { useToast } from '../contexts/ToastContext';
 import apiService from '../services/api.js';
 import { useScrollAnimation } from '../hooks/useScrollAnimation.js';
+import AuthModal from './AuthModal.jsx';
 
 const Pricing = () => {
   const [billingCycle] = useState('weekly')
@@ -10,6 +11,8 @@ const Pricing = () => {
   const { subscription, isActive, getPlanName, getPlanTier, upgradeSubscription } = useSubscription();
   const { showSuccess, showError } = useToast();
   const [upgrading, setUpgrading] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [pendingSubscription, setPendingSubscription] = useState(null);
 
   // Debug logging
   console.log('Pricing component - subscription:', subscription);
@@ -209,6 +212,13 @@ const Pricing = () => {
   ]
 
   const handleUpgrade = async (stripeId) => {
+    // Check if user is authenticated first
+    if (!apiService.isAuthenticated()) {
+      setPendingSubscription(stripeId);
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     try {
       setUpgrading(true);
       
@@ -226,6 +236,28 @@ const Pricing = () => {
       showError('Failed to process request. Please try again.');
     } finally {
       setUpgrading(false);
+    }
+  }
+
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+    // Dispatch auth state change event to update other components
+    document.dispatchEvent(new CustomEvent('authStateChanged'));
+    
+    // Scroll to pricing section after successful login
+    setTimeout(() => {
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+    
+    // If there's a pending subscription, process it after a short delay
+    if (pendingSubscription) {
+      setTimeout(() => {
+        handleUpgrade(pendingSubscription);
+        setPendingSubscription(null);
+      }, 500); // Small delay to ensure auth state is updated
     }
   }
 
@@ -275,6 +307,16 @@ const Pricing = () => {
           ))}
         </div>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setPendingSubscription(null);
+        }}
+        onSuccess={handleAuthSuccess}
+      />
     </section>
   )
 }
