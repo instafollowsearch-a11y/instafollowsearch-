@@ -14,7 +14,7 @@ import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
 import DashboardSearch from './components/DashboardSearch';
 import SharedActivity from './pages/SharedActivity';
-import Admirers from './pages/Admirers';
+// import Admirers from './pages/Admirers';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import UserProfile from './pages/UserProfile';
@@ -91,7 +91,7 @@ function App() {
           <Route path="/sharedactivity" element={<SharedActivity />} />
           
           {/* Admirers */}
-          <Route path="/admirers" element={<Admirers />} />
+          {/* <Route path="/admirers" element={<Admirers />} /> */}
           
           {/* Payment pages */}
           <Route path="/successfulpayment" element={<PaymentSuccess />} />
