@@ -4,7 +4,23 @@ Allow: /
 # Sitemap
 Sitemap: https://instarecentfollow.com/sitemap.xml
 
-# Disallow admin and private areas
 Disallow: /api/
 Disallow: /admin/
-Disallow: /private/ 
+Disallow: /private/
+Disallow: /*.json$
+Disallow: /*?*
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://instafollowcheck.com/sitemap.xml
+
+# Additional directives for better SEO
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2 

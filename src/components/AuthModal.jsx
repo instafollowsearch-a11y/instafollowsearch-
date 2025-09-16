@@ -16,6 +16,25 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
     setIsLoading(true);
     setError('');
 
+    // Client-side validation for signup
+    if (!isLogin) {
+      if (!formData.username.trim()) {
+        setError('Username is required');
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.email.trim()) {
+        setError('Email is required');
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.password.trim()) {
+        setError('Password is required');
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
       let response;
       if (isLogin) {
@@ -33,7 +52,19 @@ const AuthModal = ({ isOpen, onClose, onSuccess }) => {
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      // Handle specific error messages
+      if (err.message && (
+        err.message.toLowerCase().includes('email') || 
+        err.message.toLowerCase().includes('already exists') ||
+        err.message.toLowerCase().includes('duplicate')
+      )) {
+        setError('User with this email already exists');
+      } else if (err.message && err.message.toLowerCase().includes('username')) {
+        // This shouldn't happen with the new validation, but just in case
+        setError('Username validation error');
+      } else {
+        setError(err.message || 'Authentication failed');
+      }
     } finally {
       setIsLoading(false);
     }

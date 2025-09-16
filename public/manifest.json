@@ -1,0 +1,29 @@
+{
+  "name": "InstaFollowCheck - Instagram Followers Analytics",
+  "short_name": "InstaFollowCheck",
+  "description": "Find and analyze Instagram followers with our powerful search tool. Get detailed analytics, follower insights, and growth strategies.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F0F23",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["social", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}
