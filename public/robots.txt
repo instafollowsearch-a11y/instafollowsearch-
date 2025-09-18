@@ -1,9 +1,6 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://instarecentfollow.com/sitemap.xml
-
 Disallow: /api/
 Disallow: /admin/
 Disallow: /private/
@@ -14,7 +11,7 @@ Disallow: /*?*
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://instafollowcheck.com/sitemap.xml
+Sitemap: https://www.instafollowcheck.com/sitemap.xml
 
 # Additional directives for better SEO
 User-agent: Googlebot

@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://instafollowcheck.com/</loc>
+    <loc>https://www.instafollowcheck.com/</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/dashboard</loc>
+    <loc>https://www.instafollowcheck.com/dashboard</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/dashboard/search</loc>
+    <loc>https://www.instafollowcheck.com/dashboard/search</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/successfulpayment</loc>
+    <loc>https://www.instafollowcheck.com/successfulpayment</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/paymentfailed</loc>
+    <loc>https://www.instafollowcheck.com/paymentfailed</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/admirers</loc>
+    <loc>https://www.instafollowcheck.com/admirers</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/sharedactivity</loc>
+    <loc>https://www.instafollowcheck.com/sharedactivity</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://instafollowcheck.com/profile</loc>
+    <loc>https://www.instafollowcheck.com/profile</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
