@@ -5,10 +5,6 @@ const PageNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Debug logging
-  console.log('PageNavigation rendered for path:', location.pathname);
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Component should be icon-only floating widget');
 
   // Don't show navigation on homepage
   if (location.pathname === '/') {

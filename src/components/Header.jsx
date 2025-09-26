@@ -143,7 +143,7 @@ const Header = () => {
                 Features
               </button>
               <button 
-                onClick={() => scrollToSection('pricing')}
+                onClick={() => navigate('/pricing')}
                 className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Pricing
@@ -232,7 +232,7 @@ const Header = () => {
               Features
             </button>
             <button 
-              onClick={() => scrollToSection('pricing')}
+              onClick={() => navigate('/pricing')}
               className="text-white/70 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Pricing

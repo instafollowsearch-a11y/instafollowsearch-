@@ -282,21 +282,26 @@ const Dashboard = () => {
               <div className="mt-2 text-xs text-yellow-300 font-semibold">
                 ⏳ Coming Soon
               </div>
-                  </div>
+            </div>
                   
-            {/* View Instagram Profile - Coming Soon */}
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl text-center opacity-75 cursor-not-allowed">
+            {/* View Instagram Profile */}
+            <button
+              onClick={() => (getPlanTier() >= 2) ? window.location.href = '/viewprofile' : setShowUpgradePrompt(true)}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 text-center"
+            >
               <svg className="w-8 h-8 mb-4 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
               </svg>
               <h3 className="text-lg font-semibold mb-2">View Instagram Profile</h3>
-              <p className="text-white/80 text-sm mb-2">
-                View profiles even if you're blocked
+              <p className="text-white/80 text-sm">
+                {(getPlanTier() >= 2) ? 'View detailed profiles with analytics' : 'Premium feature - Upgrade to access'}
               </p>
-              <div className="mt-2 text-xs text-yellow-300 font-semibold">
-                ⏳ Coming Soon
-              </div>
-            </div>
+              {(getPlanTier() < 2) && (
+                <div className="mt-2 text-xs text-yellow-300 font-semibold">
+                  🔒 Premium Feature
+                </div>
+              )}
+            </button>
                   </div>
                   </div>
                   
@@ -365,10 +370,9 @@ const Dashboard = () => {
       {/* Upgrade Prompt Modal */}
       <SubscriptionUpgradePrompt
         isOpen={showUpgradePrompt}
-        feature="Advanced search features are available for premium subscribers. Upgrade your plan to access full search capabilities with comparison and analysis tools."
         onClose={() => setShowUpgradePrompt(false)}
-        upgradeButtonText="Upgrade from Plans"
-        onUpgrade={() => setShowUpgradePrompt(false)}
+        feature="Premium Features"
+        description="Access advanced Instagram analytics and profile viewing features"
       />
     </div>
   );

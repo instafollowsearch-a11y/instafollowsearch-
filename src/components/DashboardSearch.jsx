@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useToast } from '../contexts/ToastContext';
 import apiService from '../services/api.js';
@@ -9,6 +10,7 @@ import PageNavigation from './PageNavigation';
 import SubscriptionUpgradePrompt from './SubscriptionUpgradePrompt';
 
 const DashboardSearch = () => {
+  const navigate = useNavigate();
   const { isActive, getPlanTier, loading: subscriptionLoading } = useSubscription();
   const { showSuccess, showError, showInfo } = useToast();
   const [username, setUsername] = useState('');
@@ -901,7 +903,7 @@ const DashboardSearch = () => {
                           </p>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <button
-                              onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
+                              onClick={() => navigate('/pricing')}
                               className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                             >
                               View Premium Plans
@@ -948,7 +950,7 @@ const DashboardSearch = () => {
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3">
                         <button
-                          onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
+                          onClick={() => navigate('/pricing')}
                           className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                         >
                           View Premium Plans

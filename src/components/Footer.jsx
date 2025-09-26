@@ -1,6 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Footer = () => {
+  const navigate = useNavigate()
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
@@ -11,7 +13,7 @@ const Footer = () => {
   const footerLinks = {
     product: [
       { name: 'Features', action: () => scrollToSection('features') },
-      { name: 'Pricing', action: () => scrollToSection('pricing') },
+      { name: 'Pricing', action: () => navigate('/pricing') },
       { name: 'How It Works', action: () => scrollToSection('how-it-works') }
     ],
     company: [

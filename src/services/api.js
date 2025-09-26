@@ -75,6 +75,16 @@ class ApiService {
     });
   }
 
+  async getNextMedias(userId, nextPageId) {
+    return this.request('/instagram/next-medias', {
+      method: 'POST',
+      body: JSON.stringify({ userId, nextPageId }),
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+    });
+  }
+
   async getUserInfo(username) {
     return this.request(`/instagram/user/${username}`, {
       method: 'GET',
@@ -93,6 +103,26 @@ class ApiService {
     return this.request('/instagram/shared-activity', {
       method: 'POST',
       body: JSON.stringify({ username1, username2 }),
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+    });
+  }
+
+  async getAdmirers(username) {
+    return this.request('/instagram/admirers', {
+      method: 'POST',
+      body: JSON.stringify({ username }),
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+    });
+  }
+
+  async getInstaProfile(username) {
+    return this.request('/instagram/view-profile', {
+      method: 'POST',
+      body: JSON.stringify({ username }),
       headers: {
         'Authorization': `Bearer ${this.getToken()}`,
       },
@@ -203,4 +233,5 @@ class ApiService {
   }
 }
 
+export { API_BASE_URL };
 export default new ApiService(); 

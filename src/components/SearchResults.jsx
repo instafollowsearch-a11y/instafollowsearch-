@@ -1,4 +1,5 @@
 import apiService from '../services/api.js';
+import { useNavigate } from 'react-router-dom';
 
 const SearchResults = ({ 
   results, 
@@ -18,6 +19,8 @@ const SearchResults = ({
   showLoadMore = true,
   getPlanTier
 }) => {
+  const navigate = useNavigate();
+  
   const renderUserCard = (user, index) => (
     <div key={user.id || index} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-200">
       <img
@@ -512,7 +515,7 @@ const SearchResults = ({
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => navigate('/pricing')}
                   className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105 shadow-lg"
                 >
                   🚀 View Pricing Plans

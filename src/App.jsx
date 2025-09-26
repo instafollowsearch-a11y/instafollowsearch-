@@ -15,9 +15,11 @@ import Dashboard from './components/Dashboard';
 import DashboardSearch from './components/DashboardSearch';
 import SharedActivity from './pages/SharedActivity';
 // import Admirers from './pages/Admirers';
+import ViewProfile from './pages/ViewProfile';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import UserProfile from './pages/UserProfile';
+import PricingPage from './pages/PricingPage';
 import NotFound from './pages/NotFound';
 import SEO from './components/SEO.jsx';
 import StructuredData from './components/StructuredData.jsx';
@@ -93,12 +95,18 @@ function App() {
           {/* Admirers */}
           {/* <Route path="/admirers" element={<Admirers />} /> */}
           
+          {/* View Instagram Profile */}
+          <Route path="/viewprofile" element={<ViewProfile />} />
+          
           {/* Payment pages */}
           <Route path="/successfulpayment" element={<PaymentSuccess />} />
           <Route path="/paymentfailed" element={<PaymentCancel />} />
           
           {/* User Profile */}
           <Route path="/profile" element={<UserProfile />} />
+          
+          {/* Pricing Page */}
+          <Route path="/pricing" element={<PricingPage />} />
           
           {/* 404 page */}
           <Route path="*" element={<NotFound />} />

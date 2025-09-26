@@ -8,7 +8,7 @@ const SubscriptionUpgradePrompt = ({ isOpen, feature, onClose, upgradeButtonText
     if (onUpgrade) {
       onUpgrade();
     } else {
-      navigate('/#pricing');
+      navigate('/pricing');
       if (onClose) onClose();
     }
   };

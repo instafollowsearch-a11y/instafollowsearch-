@@ -1,9 +1,11 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiService from '../services/api.js'
 import { useScrollAnimation } from '../hooks/useScrollAnimation.js'
 import { useSubscription } from '../contexts/SubscriptionContext'
 
 const Features = () => {
+  const navigate = useNavigate();
   const [headerRef, isHeaderVisible] = useScrollAnimation();
   const { getPlanTier } = useSubscription();
   
@@ -34,6 +36,9 @@ const Features = () => {
             searchSection.scrollIntoView({ behavior: 'smooth' });
           }
         }
+      } else if (feature.type === 'view-profile') {
+        // View Instagram Profile - Free/Basic users can access, but will see upgrade prompt on the page
+        navigate('/viewprofile');
       } else if (feature.link) {
         // Direct navigation for other features
         window.location.href = feature.link;
@@ -127,9 +132,20 @@ const Features = () => {
         </svg>
       ),
       title: 'Admirer Feature',
-      description: 'Discover who interacts with your page or a page you’re interested in the most.',
+      description: 'Discover who interacts with your page or a page you\'re interested in the most.',
       gradient: 'from-red-500 to-pink-500',
       link: '/dashboard'
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6a4 4 0 100 8 4 4 0 000-8zm8 8a8 8 0 11-16 0 8 8 0 0116 0z" />
+        </svg>
+      ),
+      title: 'View Instagram Profile',
+      description: 'Open a public Instagram profile by entering a username',
+      gradient: 'from-indigo-500 to-purple-600',
+      type: 'view-profile'
     },
     {
       icon: (
@@ -150,9 +166,20 @@ const Features = () => {
         </svg>
       ),
       title: 'Red Flag Detection',
-      description: 'Automatically reveal new interactions from users most likely interested in the profile you’re searching—no guesswork',
+      description: 'Automatically reveal new interactions from users most likely interested in the profile you\'re searching—no guesswork',
       gradient: 'from-indigo-500 to-purple-500',
       type: 'conditional-navigation'
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+      title: 'Download Instagram Posts',
+      description: 'Download any Instagram post, story, or media content for offline viewing and archiving',
+      gradient: 'from-emerald-500 to-teal-500',
+      link: '/dashboard/search'
     }
   ]
 
@@ -174,9 +201,11 @@ const Features = () => {
         </div>
 
         {/* Features grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="flex flex-wrap justify-center gap-8">
           {features.map((feature, index) => (
-            <FeatureCard key={index} feature={feature} index={index} />
+            <div key={index} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] flex justify-center">
+              <FeatureCard feature={feature} index={index} />
+            </div>
           ))}
         </div>
 

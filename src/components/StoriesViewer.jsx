@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { downloadStory, downloadAllStories } from '../utils/downloadUtils';
 import { useToast } from '../contexts/ToastContext';
+import { API_BASE_URL } from '../services/api.js';
 
 const StoriesViewer = ({ stories, isOpen, onClose, username, startIndex = 0 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -11,6 +12,12 @@ const StoriesViewer = ({ stories, isOpen, onClose, username, startIndex = 0 }) =
   const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef(null);
   const { showSuccess, showError } = useToast();
+
+  // Proxy function for images
+  const proxy = (url) => {
+    if (!url) return '';
+    return `${API_BASE_URL}/instagram/proxy-image?url=${encodeURIComponent(url)}`;
+  };
 
   // Reset index when stories change or modal opens
   useEffect(() => {
@@ -212,11 +219,21 @@ const StoriesViewer = ({ stories, isOpen, onClose, username, startIndex = 0 }) =
                     muted={isMuted}
                     playsInline
                     controls={false}
+                    crossOrigin="anonymous"
                     onLoadStart={() => setIsVideoLoading(true)}
                     onCanPlay={() => setIsVideoLoading(false)}
                     onError={(e) => {
                       console.error('Video error:', e);
                       setIsVideoLoading(false);
+                      // As a fallback, try loading through backend proxy if it's an http(s) URL
+                      try {
+                        if (currentStory.mediaUrl && !currentStory.mediaUrl.includes('proxy-image')) {
+                          const proxied = proxy(currentStory.mediaUrl);
+                          if (e.target.src !== proxied) {
+                            e.target.src = proxied;
+                          }
+                        }
+                      } catch (_) {}
                     }}
                     onEnded={() => {
                       if (currentIndex < stories.length - 1) {
@@ -230,12 +247,12 @@ const StoriesViewer = ({ stories, isOpen, onClose, username, startIndex = 0 }) =
               ) : (
                 <div className="relative">
                   <img
-                    src={`https://images.weserv.nl/?url=${encodeURIComponent(currentStory.mediaUrl)}`}
+                    src={proxy(currentStory.mediaUrl)}
                     alt={`Story ${currentIndex + 1}`}
                     className="w-full h-96 object-cover"
                     onError={(e) => {
                       // Try direct URL as fallback
-                      if (e.target.src.includes('weserv.nl')) {
+                      if (e.target.src.includes('proxy-image')) {
                         e.target.src = currentStory.mediaUrl;
                         return;
                       }
