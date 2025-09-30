@@ -25,11 +25,9 @@ const PageNavigation = () => {
     navigate('/');
   };
 
-  // Check if page has navbar (SharedActivity has Header)
-  const hasNavbar = location.pathname === '/sharedactivity';
-
+  // Header is now available on all pages, so always position below header
   return (
-    <div className={`fixed right-4 z-[60] ${hasNavbar ? 'top-20' : 'top-4'}`} data-component="PageNavigation">
+    <div className="fixed right-4 top-20 z-[60]" data-component="PageNavigation">
       <div className="bg-white/20 backdrop-blur-md border-2 border-white/30 rounded-xl p-3 shadow-lg relative">
         <div className="flex items-center space-x-2">
           <button

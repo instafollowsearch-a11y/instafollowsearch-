@@ -4,7 +4,7 @@
 export const initAnalytics = () => {
   if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
     // Add your GA4 measurement ID here
-    const GA_MEASUREMENT_ID = 'G-6M02EXE9L9'; // Replace with actual ID
+    const GA_MEASUREMENT_ID = 'G-XVWMEKTKSY'; // Replace with actual ID
     
     // Load Google Analytics
     const script = document.createElement('script');

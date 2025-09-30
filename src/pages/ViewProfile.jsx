@@ -20,6 +20,7 @@ const ViewProfile = () => {
   const [isMediaOpen, setIsMediaOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [error, setError] = useState(null);
   
   // Tab management
   const [activeTab, setActiveTab] = useState('posts');
@@ -41,7 +42,6 @@ const ViewProfile = () => {
     const colors = ['4F46E5','EC4899','10B981','F59E0B','8B5CF6','06B6D4'];
     const color = colors[seed % colors.length];
     const initials = handle.slice(0, 2).toUpperCase();
-
     const medias = Array.from({ length: 18 }).map((_, i) => ({
       id: `${handle}-${i}`,
       thumb: `https://picsum.photos/seed/${handle}-${i}/800/800`,
@@ -74,10 +74,27 @@ const ViewProfile = () => {
 
   // Helper function to map individual media items
   const mapMediaItem = (p, i, usernameApi) => {
+    // Extract the actual post data from the nested structure
+    const postData = p.post || p;
+    
+    // Extract collaboration information
+    const originalUser = postData.user || {};
+    const coauthorProducers = postData.coauthor_producers || [];
+    const userTagsRaw = postData.usertags || [];
+    const userTags = Array.isArray(userTagsRaw)
+      ? userTagsRaw
+      : (userTagsRaw?.in ?? userTagsRaw?.users ?? []); // handle object shape
+    
+    // Check if this is a collaboration post (different from searched user)
+    const isCollaboration = originalUser.username && originalUser.username !== usernameApi;
+    const collaborators = coauthorProducers.length > 0 ? coauthorProducers : userTags.map(tag => tag.user);
+    
+    // Backend will no longer return likers/comments inline; fetch on demand in modal
+    
     // Handle carousel posts (multiple images)
-    if (p.carousel_media_count > 1 && p.carousel_media) {
-      const carouselItems = p.carousel_media.map((item, itemIndex) => ({
-        id: item.id || `${p.id}-${itemIndex}`,
+    if (postData.carousel_media_count > 1 && postData.carousel_media) {
+      const carouselItems = postData.carousel_media.map((item, itemIndex) => ({
+        id: item.id || `${postData.id}-${itemIndex}`,
         thumb: item.thumbnail_url || (item.image_versions2?.candidates?.[1]?.url) || (item.image_versions2?.candidates?.[0]?.url) || '',
         url: (item.image_versions2?.candidates?.[0]?.url) || '',
         image: (item.image_versions2?.candidates?.[0]?.url) || '',
@@ -86,33 +103,41 @@ const ViewProfile = () => {
       }));
       
       return {
-        id: p.id || `${usernameApi}-${i}`,
-        thumb: p.thumbnail_url || (p.image_versions2?.candidates?.[1]?.url) || (p.image_versions2?.candidates?.[0]?.url) || '',
-        url: (p.image_versions2?.candidates?.[0]?.url) || '',
-        image: (p.image_versions2?.candidates?.[0]?.url) || '',
-        likes: p.like_count ?? p.likeCount ?? 0,
-        comments: p.comment_count ?? p.commentCount ?? 0,
+        id: postData.id || `${usernameApi}-${i}`,
+        thumb: postData.thumbnail_url || (postData.image_versions2?.candidates?.[1]?.url) || (postData.image_versions2?.candidates?.[0]?.url) || '',
+        url: (postData.image_versions2?.candidates?.[0]?.url) || '',
+        image: (postData.image_versions2?.candidates?.[0]?.url) || '',
+        likes: postData.like_count ?? postData.likeCount ?? 0,
+        comments: postData.comment_count ?? postData.commentCount ?? 0,
         type: 'carousel',
         carouselItems: carouselItems,
-        carouselCount: p.carousel_media_count || carouselItems.length
+        carouselCount: postData.carousel_media_count || carouselItems.length,
+        // Collaboration info
+        isCollaboration: isCollaboration,
+        originalUser: originalUser,
+        collaborators: collaborators
       };
     }
     
     // Handle single media posts
-    const thumb = p.thumbnail_url || (p.image_versions2?.candidates?.[1]?.url) || (p.image_versions2?.candidates?.[0]?.url) || '';
-    const isVideo = p.media_type === 2;
+    const thumb = postData.thumbnail_url || (postData.image_versions2?.candidates?.[1]?.url) || (postData.image_versions2?.candidates?.[0]?.url) || '';
+    const isVideo = postData.media_type === 2;
     
     return {
-      id: p.id || `${usernameApi}-${i}`,
+      id: postData.id || `${usernameApi}-${i}`,
       thumb: thumb,
-      url: p.video_url || (p.image_versions2?.candidates?.[0]?.url) || '',
-      image: (p.image_versions2?.candidates?.[0]?.url) || '',
-      likes: p.like_count ?? p.likeCount ?? 0,
-      comments: p.comment_count ?? p.commentCount ?? 0,
+      url: postData.video_url || (postData.image_versions2?.candidates?.[0]?.url) || '',
+      image: (postData.image_versions2?.candidates?.[0]?.url) || '',
+      likes: postData.like_count ?? postData.likeCount ?? 0,
+      comments: postData.comment_count ?? postData.commentCount ?? 0,
       type: isVideo ? 'video' : 'image',
-      videoUrl: isVideo ? (p.video_url || (p.video_versions?.[0]?.url) || '') : '',
-      videoDuration: isVideo ? p.video_duration : null,
-      hasAudio: isVideo ? p.has_audio : false
+      videoUrl: isVideo ? (postData.video_url || (postData.video_versions?.[0]?.url) || '') : '',
+      videoDuration: isVideo ? postData.video_duration : null,
+      hasAudio: isVideo ? postData.has_audio : false,
+      // Collaboration info
+      isCollaboration: isCollaboration,
+      originalUser: originalUser,
+      collaborators: collaborators
     };
   };
 
@@ -152,7 +177,7 @@ const ViewProfile = () => {
       highlights: [],
       medias,
       stories: mappedStories,
-      mediasNextPageId: payload?.userPosts?.nextPageId || null, // Add medias pagination
+      mediasNextPageId: payload?.mediaNextPageId || payload?.userPosts?.nextPageId || null, // Check both locations
     };
   };
 
@@ -165,6 +190,9 @@ const ViewProfile = () => {
         key={m.id}
         className="relative group aspect-square overflow-hidden bg-black cursor-pointer"
         onClick={() => {
+          console.log('Selected media:', m);
+          console.log('Likers list:', m.likersList);
+          console.log('Comments list:', m.commentsList);
           setSelectedMedia(m);
           setIsMediaOpen(true);
         }}
@@ -193,15 +221,25 @@ const ViewProfile = () => {
           </div>
         )}
         
+        {/* Collaboration indicator */}
+        {m.isCollaboration && (
+          <div className="absolute top-2 left-2 bg-blue-500/80 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H16c-.8 0-1.54.37-2.01.99L12 11l-1.99-2.01A2.5 2.5 0 0 0 8 8H5.46c-.8 0-1.54.37-2.01.99L1 15.5V22h2v-6h2.5l2.54-7.63A1.5 1.5 0 0 1 9.46 8H12c.8 0 1.54.37 2.01.99L16 11l1.99-2.01A2.5 2.5 0 0 1 20 8h2.5l-2.54 7.63A1.5 1.5 0 0 1 18.54 18H16v4h4z"/>
+            </svg>
+            Collab
+          </div>
+        )}
+        
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6 text-white font-semibold">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            {m.likes}
-          </div>
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12l4-4h14a2 2 0 002-2V6a2 2 0 00-2-2z"/></svg>
-            {m.comments}
-          </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              {m.likes || 0}
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12l4-4h14a2 2 0 002-2V6a2 2 0 00-2-2z"/></svg>
+              {m.comments || 0}
+            </div>
         </div>
       </div>
     ));
@@ -347,6 +385,18 @@ const ViewProfile = () => {
     e.preventDefault();
     if (!username.trim()) return;
     
+    // Clear previous profile and error immediately when starting new search
+    setProfile(null);
+    setStories([]);
+    setHasStories(false);
+    setError(null);
+    setFollowers([]);
+    setFollowing([]);
+    setFollowersNextPageId(null);
+    setFollowingNextPageId(null);
+    setMediasNextPageId(null);
+    setActiveTab('posts');
+    
     // Check subscription for View Profile feature
     const planTier = getPlanTier();
     if (planTier < 2) {
@@ -356,12 +406,18 @@ const ViewProfile = () => {
     
     const handle = username.trim().replace(/^@+/, '');
     
-    // Log user info from backend (for now)
     try {
       setIsLoading(true);
       const userInfo = await apiService.getInstaProfile(handle);
       console.log('Fetched user info:', userInfo);
       const payload = userInfo?.data || userInfo;
+      
+      // Check if the response indicates user not found
+      if (payload && payload.success === false) {
+        setError('Username not found on Instagram');
+        return;
+      }
+      
       if (payload && (payload.userinfo || payload.userPosts)) {
         const mapped = mapApiToProfile(payload);
         setProfile(mapped);
@@ -380,28 +436,39 @@ const ViewProfile = () => {
         
         // Set medias pagination data
         if (payload.userPosts) {
+          console.log('Setting mediasNextPageId from userPosts:', payload.userPosts.nextPageId);
           setMediasNextPageId(payload.userPosts.nextPageId || null);
         }
+        // Also check the top-level mediaNextPageId
+        if (payload.mediaNextPageId) {
+          console.log('Setting mediasNextPageId from mediaNextPageId:', payload.mediaNextPageId);
+          setMediasNextPageId(payload.mediaNextPageId);
+        }
         
-        setIsLoading(false);
         // trigger ring animation once stories detected
         if ((mapped.stories || []).length > 0) {
           setIsRingAnimating(true);
           setTimeout(() => setIsRingAnimating(false), 1200 * 2);
         }
         return;
+      } else {
+        // If no valid data in response
+        setError('Username not found on Instagram, or is private.');
       }
     } catch (err) {
       console.error('Failed to fetch user info:', err);
+      // If backend returned a structured error (e.g., 404 user not found), surface it nicely
+      const resp = err?.response?.data;
+      if (resp && resp.success === false) {
+        setError('Username not found on Instagram, or is private.');
+      } else if (typeof resp?.error === 'string') {
+        setError(resp.error);
+      } else {
+        setError('Username not found on Instagram, or is private.');
+      }
     } finally {
       setIsLoading(false);
     }
-
-    // Keep mock profile rendering for UI preview
-    // const mock = makeMockProfile(handle);
-    // setProfile(mock);
-    // setStories([]);
-    // setHasStories(false);
   };
 
   return (
@@ -428,7 +495,11 @@ const ViewProfile = () => {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                // Clear error when user starts typing
+                if (error) setError(null);
+              }}
               placeholder="Enter Instagram username"
               className="flex-1 px-6 py-4 text-lg bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
@@ -448,6 +519,20 @@ const ViewProfile = () => {
             </button>
           </div>
         </form>
+        
+        {/* Error Message */}
+        {error && (
+          <div className="max-w-2xl mx-auto mt-6">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
+              <div className="flex items-center justify-center gap-2 text-red-400">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">{error}</span>
+              </div>
+            </div>
+          </div>
+        )}
         
         {profile && (
           <div className="max-w-5xl mx-auto mt-10 space-y-8 border border-white/15 rounded-3xl bg-white/5 backdrop-blur-md p-6 md:p-8 shadow-[inset_0_1px_20px_rgba(0,0,0,0.35)]">
@@ -568,6 +653,7 @@ const ViewProfile = () => {
                 </div>
                 
                 {/* Load More Button for Posts */}
+                {console.log('Rendering Load More button. mediasNextPageId:', mediasNextPageId, 'isLoadingMoreMedias:', isLoadingMoreMedias)}
                 {mediasNextPageId && (
                   <div className="flex justify-center pt-4">
                     <button

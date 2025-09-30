@@ -85,6 +85,28 @@ class ApiService {
     });
   }
 
+  // Fetch likers for a single media
+  async getMediaLikers(mediaId) {
+    return this.request('/instagram/media-likers', {
+      method: 'POST',
+      body: JSON.stringify({ mediaId }),
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+    });
+  }
+
+  // Fetch comments for a single media
+  async getMediaComments(mediaId) {
+    return this.request('/instagram/media-comments', {
+      method: 'POST',
+      body: JSON.stringify({ mediaId }),
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+    });
+  }
+
   async getUserInfo(username) {
     return this.request(`/instagram/user/${username}`, {
       method: 'GET',
@@ -231,6 +253,7 @@ class ApiService {
   isAuthenticated() {
     return !!this.getToken();
   }
+
 }
 
 export { API_BASE_URL };

@@ -9,7 +9,7 @@ import CancelSubscriptionModal from '../components/CancelSubscriptionModal';
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const { subscription, loading: subscriptionLoading, cancelSubscription, fetchSubscription } = useSubscription();
+  const { subscription, loading: subscriptionLoading, cancelSubscription, fetchSubscription, logout } = useSubscription();
   const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -394,14 +394,17 @@ const UserProfile = () => {
             )}
             <button
               onClick={() => {
-                apiService.removeToken();
-                logout(); // Clear subscription state
-                // Dispatch auth state change event
-                document.dispatchEvent(new CustomEvent('authStateChanged'));
-                // Navigate to homepage
-                navigate('/');
-                // Force page reload to clear all state
-                window.location.reload();
+                try {
+                  // Remove auth token and clear subscription context
+                  apiService.removeToken();
+                  logout();
+                  // Notify listeners and navigate home
+                  document.dispatchEvent(new CustomEvent('authStateChanged'));
+                  navigate('/');
+                } finally {
+                  // Ensure UI fully resets like header logout
+                  setTimeout(() => window.location.reload(), 50);
+                }
               }}
               className="flex-1 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-all duration-200 font-semibold"
             >
