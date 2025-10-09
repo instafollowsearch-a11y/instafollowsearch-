@@ -134,7 +134,7 @@ const Features = () => {
       title: 'Admirer Feature',
       description: 'Discover who interacts with your page or a page you\'re interested in the most.',
       gradient: 'from-red-500 to-pink-500',
-      link: '/dashboard'
+      link: '/admirers'
     },
     {
       icon: (

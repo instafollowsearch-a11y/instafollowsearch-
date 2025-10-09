@@ -270,19 +270,24 @@ const Dashboard = () => {
               )}
             </button>
 
-            {/* Admirer Feature - Coming Soon */}
-            <div className="bg-gradient-to-r from-pink-500 to-rose-600 text-white p-6 rounded-xl text-center opacity-75 cursor-not-allowed">
+            {/* Admirer Feature */}
+            <button
+              onClick={() => (getPlanTier() >= 2) ? window.location.href = '/admirers' : setShowUpgradePrompt(true)}
+              className="bg-gradient-to-r from-pink-500 to-rose-600 text-white p-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-200 transform hover:scale-105 text-center"
+            >
               <svg className="w-8 h-8 mb-4 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
               </svg>
               <h3 className="text-lg font-semibold mb-2">Admirer Feature</h3>
-              <p className="text-white/80 text-sm mb-2">
-                Find users who interact most with any profile
+              <p className="text-white/80 text-sm">
+                {(getPlanTier() >= 2) ? 'Find users who interact most with any profile' : 'Premium feature - Upgrade to access'}
               </p>
-              <div className="mt-2 text-xs text-yellow-300 font-semibold">
-                ⏳ Coming Soon
-              </div>
-            </div>
+              {(getPlanTier() < 2) && (
+                <div className="mt-2 text-xs text-yellow-300 font-semibold">
+                  🔒 Premium Feature
+                </div>
+              )}
+            </button>
                   
             {/* View Instagram Profile */}
             <button
