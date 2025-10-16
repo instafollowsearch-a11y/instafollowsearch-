@@ -13,10 +13,8 @@ const Features = () => {
     const [cardRef, isCardVisible] = useScrollAnimation();
     
     const handleClick = () => {
-      if (!apiService.isAuthenticated()) {
-        document.dispatchEvent(new CustomEvent('showAuthModal'));
-        return;
-      }
+      // Let users navigate to feature pages even if not logged in.
+      // Gating will happen inside the feature pages via existing modals.
 
       // Handle different feature behaviors
       if (feature.type === 'scroll-to-search') {
@@ -26,16 +24,8 @@ const Features = () => {
           searchSection.scrollIntoView({ behavior: 'smooth' });
         }
       } else if (feature.type === 'conditional-navigation') {
-        // Track Recent Followers & Red Flag Detection - Premium users go to Advanced Search
-        const planTier = getPlanTier();
-        if (planTier >= 2) {
-          window.location.href = '/dashboard/search';
-        } else {
-          const searchSection = document.getElementById('search-section');
-          if (searchSection) {
-            searchSection.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
+        // Always navigate to feature page; page will handle upgrade prompts
+        window.location.href = '/dashboard/search';
       } else if (feature.type === 'view-profile') {
         // View Instagram Profile - Free/Basic users can access, but will see upgrade prompt on the page
         navigate('/viewprofile');
@@ -179,7 +169,7 @@ const Features = () => {
       title: 'Download Instagram Posts',
       description: 'Download any Instagram post, story, or media content for offline viewing and archiving',
       gradient: 'from-emerald-500 to-teal-500',
-      link: '/dashboard/search'
+      link: '/viewprofile'
     }
   ]
 

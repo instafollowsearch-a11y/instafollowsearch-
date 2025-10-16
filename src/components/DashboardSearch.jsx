@@ -56,20 +56,8 @@ const DashboardSearch = () => {
   };
 
   useEffect(() => {
-    // Check authentication
-    console.log('DashboardSearch - Checking authentication:', apiService.isAuthenticated());
-    if (!apiService.isAuthenticated()) {
-      console.log('DashboardSearch - Not authenticated, redirecting to home');
-      // Redirect to home page to show login modal
-      window.location.href = '/';
-      return;
-    }
-    
-    console.log('DashboardSearch - Authenticated, setting auth check to false');
+    // Allow page to load for all users; gating happens on actions
     setIsCheckingAuth(false);
-    
-    // Dispatch auth state change event to update Header
-    document.dispatchEvent(new CustomEvent('authStateChanged'));
   }, []);
 
   // Transform story data from API response to component format
@@ -126,13 +114,7 @@ const DashboardSearch = () => {
       return;
     }
 
-    // Check authentication
-    if (!apiService.isAuthenticated()) {
-      setError('Please log in to use advanced search');
-      return;
-    }
-
-    // Check subscription - require Premium or Pro plan
+    // Require Premium for using advanced search (logged in or not)
     if (getPlanTier() < 2) {
       setShowUpgradePrompt(true);
       return;

@@ -18,7 +18,7 @@ const Admirers = () => {
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
-  const { isActive, getPlanTier } = useSubscription();
+  const { getPlanTier } = useSubscription();
   const { showError } = useToast();
   const [headerRef, isHeaderVisible] = useScrollAnimation();
 
@@ -33,12 +33,6 @@ const Admirers = () => {
     
     if (!username.trim()) {
       setError('Please enter a username');
-      return;
-    }
-
-    // Check if user is authenticated
-    if (!apiService.isAuthenticated()) {
-      setIsAuthModalOpen(true);
       return;
     }
 

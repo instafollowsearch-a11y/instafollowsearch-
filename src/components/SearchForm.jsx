@@ -35,11 +35,22 @@ const SearchForm = () => {
     setIsLoading(true);
     setError('');
     setResults(null);
+    setFollowers([]);
+    setFollowing([]);
+    setFollowersNextPageId(null);
+    setFollowingNextPageId(null);
 
     try {
       const response = await apiService.searchInstagram(cleanUsername, searchType);
       const data = response.data;
-      setResults(data);
+      // Normalize preview arrays so sections always render
+      const normalizedNewFollowers = Array.isArray(data?.newFollowers)
+        ? data.newFollowers
+        : (Array.isArray(data?.followers) ? data.followers : []);
+      const normalizedNewFollowing = Array.isArray(data?.newFollowing)
+        ? data.newFollowing
+        : (Array.isArray(data?.following) ? data.following : []);
+      setResults({ ...data, newFollowers: normalizedNewFollowers, newFollowing: normalizedNewFollowing });
       
       // If user is subscribed, extract followers and following data from the main response
       if (isActive() && data) {
