@@ -1,5 +1,7 @@
+import React, { useState } from 'react';
 import apiService from '../services/api.js';
 import { useNavigate } from 'react-router-dom';
+import SubscriptionUpgradePrompt from './SubscriptionUpgradePrompt';
 
 const SearchResults = ({ 
   results, 
@@ -20,6 +22,7 @@ const SearchResults = ({
   getPlanTier
 }) => {
   const navigate = useNavigate();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const renderUserCard = (user, index) => (
     <div key={user.id || index} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-200">
@@ -309,7 +312,7 @@ const SearchResults = ({
           // Free users see locked content
           <>
             {/* New Followers - Locked */}
-            {results.newFollowers && results.newFollowers.length > 0 && (
+            {(results.newFollowers && results.newFollowers.length > 0) || (results.followers && results.followers.length > 0) ? (
           <div className="mb-6">
             <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -321,76 +324,95 @@ const SearchResults = ({
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-white">
-                      New Followers ({results.totalNewFollowers})
+                      New Followers ({results.totalNewFollowers || (results.followers && results.followers.length) || 0})
                     </h3>
                     <p className="text-white/60 text-sm">
-                      @{results.newFollowers[0]?.username || 'user'} + {results.totalNewFollowers - 1} more
+                      @{(results.newFollowers && results.newFollowers[0]?.username) || (results.followers && results.followers[0]?.username) || 'user'} + {(results.totalNewFollowers || (results.followers && results.followers.length) || 0) - 1} more
                     </p>
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-green-500/20 text-green-400 text-sm font-medium rounded-lg hover:bg-green-500/30 transition-colors border border-green-500/30">
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="px-4 py-2 bg-green-500/20 text-green-400 text-sm font-medium rounded-lg hover:bg-green-500/30 transition-colors border border-green-500/30"
+                >
                   View All
                 </button>
               </div>
               <div className="space-y-3">
-                {results.newFollowers.slice(0, 3).map((follower) => (
-                  <div key={follower.id} className="relative group">
-                    {/* Blurred individual card with lock */}
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 relative overflow-hidden backdrop-blur-sm">
-                      {/* Frosted glass effect with purple theme */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl"></div>
-                      <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg"></div>
-                      
-                      {/* Lock icon */}
-                      <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <div className="text-center">
-                          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                            </svg>
+                {(() => {
+                  const followersData = (results.newFollowers && results.newFollowers.length > 0) ? results.newFollowers : (results.followers || []);
+                  console.log('Followers data for rendering:', followersData);
+                  
+                  if (followersData.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <p className="text-white/60">No followers data available</p>
+                      </div>
+                    );
+                  }
+                  
+                  return followersData.slice(0, 3).map((follower, idx) => (
+                    <div key={follower.id || follower.pk || idx} className="relative group">
+                      {idx < 2 ? (
+                        // Visible preview card (not blurred)
+                        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                          <img
+                            src={`https://images.weserv.nl/?url=${encodeURIComponent(follower.profilePicUrl || follower.profile_pic_url)}`}
+                            alt={follower.username}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white/20"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center text-white font-bold text-sm hidden">
+                            {(follower.fullName || follower.full_name || follower.username || '?').charAt(0).toUpperCase()}
                           </div>
-                          <p className="text-white text-sm font-medium">Premium</p>
+                          <div className="flex-1">
+                            <p className="font-medium text-white">@{follower.username}</p>
+                            <p className="text-sm text-white/60">{follower.fullName || follower.full_name || 'No name'}</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Tooltip on hover */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-30">
-                        <div className="bg-white/90 text-black px-3 py-1 rounded-lg text-xs font-medium">
-                          Upgrade to Premium to unlock
+                      ) : (
+                        // Blurred locked card
+                        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 relative overflow-hidden backdrop-blur-sm">
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl"></div>
+                          <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg"></div>
+                          <div className="absolute inset-0 flex items-center justify-center z-20">
+                            <div className="text-center">
+                              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <p className="text-white text-sm font-medium">Premium</p>
+                            </div>
+                          </div>
+                          <div className="relative z-10 opacity-60">
+                            <img
+                              src={`https://images.weserv.nl/?url=${encodeURIComponent(follower.profilePicUrl || follower.profile_pic_url)}`}
+                              alt={follower.username}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-white/20 blur-sm"
+                            />
+                            <div className="flex-1 blur-sm">
+                              <p className="font-medium text-white">@{follower.username}</p>
+                              <p className="text-sm text-white/60">{follower.fullName || follower.full_name || 'No name'}</p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Heavily blurred content */}
-                      <div className="relative z-10 opacity-60">
-                        <img
-                          src={`https://images.weserv.nl/?url=${encodeURIComponent(follower.profilePicUrl || follower.profile_pic_url)}`}
-                          alt={follower.username}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-white/20 blur-sm"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) {
-                              e.target.nextSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center text-white font-bold text-sm hidden">
-                          {(follower.fullName || follower.full_name || follower.username || '?').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 blur-sm">
-                          <p className="font-medium text-white">@{follower.username}</p>
-                          <p className="text-sm text-white/60">{follower.fullName || follower.full_name}</p>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* New Following */}
-        {results.newFollowing && results.newFollowing.length > 0 && (
+        {(results.newFollowing && results.newFollowing.length > 0) || (results.following && results.following.length > 0) ? (
           <div className="mb-6">
             <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -402,73 +424,90 @@ const SearchResults = ({
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-white">
-                      New Following ({results.totalNewFollowing})
+                      New Following ({results.totalNewFollowing || (results.following && results.following.length) || 0})
                     </h3>
                     <p className="text-white/60 text-sm">
-                      @{results.newFollowing[0]?.username || 'user'} + {results.totalNewFollowing - 1} more
+                      @{(results.newFollowing && results.newFollowing[0]?.username) || (results.following && results.following[0]?.username) || 'user'} + {(results.totalNewFollowing || (results.following && results.following.length) || 0) - 1} more
                     </p>
                   </div>
                 </div>
-                <button className="px-4 py-2 bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg hover:bg-blue-500/30 transition-colors border border-blue-500/30">
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="px-4 py-2 bg-blue-500/20 text-blue-400 text-sm font-medium rounded-lg hover:bg-blue-500/30 transition-colors border border-blue-500/30"
+                >
                   View All
                 </button>
               </div>
               <div className="space-y-3">
-                {results.newFollowing.slice(0, 3).map((following) => (
-                  <div key={following.id} className="relative group">
-                    {/* Blurred individual card with lock */}
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 relative overflow-hidden backdrop-blur-sm">
-                      {/* Frosted glass effect with purple theme */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl"></div>
-                      <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg"></div>
-                      
-                      {/* Lock icon */}
-                      <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <div className="text-center">
-                          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                            </svg>
+                {(() => {
+                  const followingData = (results.newFollowing && results.newFollowing.length > 0) ? results.newFollowing : (results.following || []);
+                  console.log('Following data for rendering:', followingData);
+                  
+                  if (followingData.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <p className="text-white/60">No following data available</p>
+                      </div>
+                    );
+                  }
+                  
+                  return followingData.slice(0, 3).map((following, idx) => (
+                    <div key={following.id || following.pk || idx} className="relative group">
+                      {idx < 2 ? (
+                        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                          <img
+                            src={`https://images.weserv.nl/?url=${encodeURIComponent(following.profilePicUrl || following.profile_pic_url)}`}
+                            alt={following.username}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white/20"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 items-center justify-center text-white font-bold text-sm hidden">
+                            {(following.fullName || following.full_name || following.username || '?').charAt(0).toUpperCase()}
                           </div>
-                          <p className="text-white text-sm font-medium">Premium</p>
+                          <div className="flex-1">
+                            <p className="font-medium text-white">@{following.username}</p>
+                            <p className="text-sm text-white/60">{following.fullName || following.full_name || 'No name'}</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Tooltip on hover */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-30">
-                        <div className="bg-white/90 text-black px-3 py-1 rounded-lg text-xs font-medium">
-                          Upgrade to Premium to unlock
+                      ) : (
+                        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 relative overflow-hidden backdrop-blur-sm">
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl"></div>
+                          <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg"></div>
+                          <div className="absolute inset-0 flex items-center justify-center z-20">
+                            <div className="text-center">
+                              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <p className="text-white text-sm font-medium">Premium</p>
+                            </div>
+                          </div>
+                          <div className="relative z-10 opacity-60">
+                            <img
+                              src={`https://images.weserv.nl/?url=${encodeURIComponent(following.profilePicUrl || following.profile_pic_url)}`}
+                              alt={following.username}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-white/20 blur-sm"
+                            />
+                            <div className="flex-1 blur-sm">
+                              <p className="font-medium text-white">@{following.username}</p>
+                              <p className="text-sm text-white/60">{following.fullName || following.full_name || 'No name'}</p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Heavily blurred content */}
-                      <div className="relative z-10 opacity-60">
-                        <img
-                          src={`https://images.weserv.nl/?url=${encodeURIComponent(following.profilePicUrl || following.profile_pic_url)}`}
-                          alt={following.username}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-white/20 blur-sm"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) {
-                              e.target.nextSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center text-white font-bold text-sm hidden">
-                          {(following.fullName || following.full_name || following.username || '?').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 blur-sm">
-                          <p className="font-medium text-white">@{following.username}</p>
-                          <p className="text-sm text-white/60">{following.fullName || following.full_name}</p>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
             </div>
           </div>
-        )}
+        ) : null}
           </>
         )}
 
@@ -549,6 +588,12 @@ const SearchResults = ({
           </div>
         </div>
       </div>
+      <SubscriptionUpgradePrompt
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        feature="Premium Feature"
+        description="View all recent followers and following is available on Premium."
+      />
     </div>
   );
 };

@@ -9,6 +9,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
   const [comments, setComments] = useState([]);
   const [isFetchingLikers, setIsFetchingLikers] = useState(false);
   const [isFetchingComments, setIsFetchingComments] = useState(false);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
   const closeBtnRef = useRef(null);
@@ -23,6 +24,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
       setComments([]);
       setIsFetchingLikers(false);
       setIsFetchingComments(false);
+      setShowDownloadMenu(false);
     }
   }, [isOpen]);
 
@@ -194,6 +196,30 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
       // Fallback to opening in new tab
       const currentMedia = getCurrentMedia();
       window.open(currentMedia.thumb || currentMedia.url || currentMedia.image || currentMedia.videoUrl, '_blank');
+    }
+  };
+
+  // Download a specific carousel item
+  const handleDownloadItem = async (item) => {
+    try {
+      const srcUrl = item.thumb || item.url || item.image || item.videoUrl;
+      const proxiedUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(srcUrl)}`;
+
+      const response = await fetch(proxiedUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const extension = item.type === 'video' ? 'mp4' : 'jpg';
+      link.download = `instagram-media-${item.id || Date.now()}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      setShowDownloadMenu(false);
+    } catch (error) {
+      console.error('Download failed:', error);
+      window.open(item.thumb || item.url || item.image || item.videoUrl, '_blank');
     }
   };
 
@@ -653,16 +679,60 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                 )}
               </div>
             </div>
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Download media"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-              </svg>
-              Download
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => {
+                  if (media.type === 'carousel' && media.carouselItems?.length > 1) {
+                    setShowDownloadMenu((prev) => !prev);
+                  } else {
+                    handleDownload();
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Download media"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Download
+              </button>
+
+              {/* Dropdown menu for carousel items */}
+              {showDownloadMenu && media.type === 'carousel' && media.carouselItems?.length > 1 && (
+                <div className="absolute bottom-12 right-0 w-64 max-h-72 overflow-auto bg-slate-800 border border-white/10 rounded-lg shadow-xl z-20">
+                  <div className="p-2 text-white/70 text-xs border-b border-white/10">Select media to download</div>
+                  <div className="divide-y divide-white/10">
+                    {media.carouselItems.map((item, idx) => (
+                      <button
+                        key={item.id || idx}
+                        onClick={() => handleDownloadItem(item)}
+                        className="w-full flex items-center gap-3 p-2 hover:bg-slate-700/60 text-left"
+                      >
+                        <div className="w-12 h-12 rounded overflow-hidden bg-slate-700 flex-shrink-0">
+                          {item.type === 'video' ? (
+                            <div className="w-full h-full grid place-items-center text-white/80">
+                              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </div>
+                          ) : (
+                            <img
+                              src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(item.thumb || item.url || item.image)}`}
+                              alt={`item-${idx}`}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-white text-sm font-medium truncate">{item.type === 'video' ? 'Video' : 'Image'} {idx + 1}</div>
+                          <div className="text-white/60 text-xs truncate">Tap to download</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

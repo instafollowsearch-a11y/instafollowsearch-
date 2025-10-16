@@ -214,7 +214,7 @@ const StoriesViewer = ({ stories, isOpen, onClose, username, startIndex = 0 }) =
                   <video
                     ref={videoRef}
                     src={currentStory.mediaUrl}
-                    className="w-full h-96 object-cover"
+                    className="w-full h-auto max-h-[70vh] object-contain bg-black"
                     autoPlay
                     muted={isMuted}
                     playsInline
@@ -249,7 +249,7 @@ const StoriesViewer = ({ stories, isOpen, onClose, username, startIndex = 0 }) =
                   <img
                     src={proxy(currentStory.mediaUrl)}
                     alt={`Story ${currentIndex + 1}`}
-                    className="w-full h-96 object-cover"
+                    className="w-full h-auto max-h-[70vh] object-contain bg-black"
                     onError={(e) => {
                       // Try direct URL as fallback
                       if (e.target.src.includes('proxy-image')) {
