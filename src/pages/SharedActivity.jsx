@@ -92,12 +92,6 @@ const SharedActivity = () => {
       return;
     }
 
-    // Check subscription - require Premium or Pro plan
-    if (getPlanTier() < 2) {
-      setShowUpgradePrompt(true);
-      return;
-    }
-
     setIsLoading(true);
     setError('');
 
@@ -150,6 +144,11 @@ const SharedActivity = () => {
           </div>
 
           {/* User Comparison Cards */}
+          {(() => {
+            const isPremium = getPlanTier() >= 2;
+            
+            if (isPremium) {
+              return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* User A Card */}
             <div className="bg-white/5 rounded-xl p-6 border border-white/10">
@@ -217,8 +216,110 @@ const SharedActivity = () => {
               </div>
             </div>
           </div>
+                );
+              } else {
+                // Free users - show blurred version
+                return (
+                  <div
+                    onClick={() => setShowUpgradePrompt(true)}
+                    className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative cursor-pointer hover:opacity-90 transition-all"
+                  >
+                    {/* User A Card - Blurred */}
+                    <div className="bg-white/5 rounded-xl p-6 border border-white/10 relative">
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10 rounded-xl"></div>
+                      <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10 rounded-xl"></div>
+                      
+                      {/* Lock icon */}
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <div className="text-center">
+                          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <p className="text-white text-sm font-medium">Premium</p>
+                        </div>
+                      </div>
+                      
+                      {/* Blurred content */}
+                      <div className="flex items-center gap-4 mb-4 relative z-0 opacity-40 blur-md">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500"></div>
+                        <div>
+                          <h4 className="text-xl font-semibold text-white">@{results.userA.username}</h4>
+                          <p className="text-white/80">Full Name</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3 relative z-0 opacity-40 blur-md">
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-white/70">Posts liked:</span>
+                          <span className="text-white font-semibold">8</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-white/70">Comments:</span>
+                          <span className="text-white font-semibold">2</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-white/70">Posts examined:</span>
+                          <span className="text-white font-semibold">24</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* User B Card - Blurred */}
+                    <div className="bg-white/5 rounded-xl p-6 border border-white/10 relative">
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10 rounded-xl"></div>
+                      <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10 rounded-xl"></div>
+                      
+                      {/* Lock icon */}
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <div className="text-center">
+                          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <p className="text-white text-sm font-medium">Premium</p>
+                        </div>
+                      </div>
+                      
+                      {/* Blurred content */}
+                      <div className="flex items-center gap-4 mb-4 relative z-0 opacity-40 blur-md">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500"></div>
+                        <div>
+                          <h4 className="text-xl font-semibold text-white">@{results.userB.username}</h4>
+                          <p className="text-white/80">Full Name</p>
+            </div>
+          </div>
+                      
+                      <div className="space-y-3 relative z-0 opacity-40 blur-md">
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-white/70">Posts liked:</span>
+                          <span className="text-white font-semibold">8</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-white/70">Comments:</span>
+                          <span className="text-white font-semibold">2</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                          <span className="text-white/70">Posts examined:</span>
+                          <span className="text-white font-semibold">24</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            })()}
 
           {/* Interaction Summary */}
+          {(() => {
+            const isPremium = getPlanTier() >= 2;
+            
+            if (isPremium) {
+              return (
           <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl p-6 mb-6">
             <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
               <svg className="w-5 h-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -242,6 +343,55 @@ const SharedActivity = () => {
               </div>
             </div>
           </div>
+              );
+            } else {
+              return (
+                <div 
+                  onClick={() => setShowUpgradePrompt(true)}
+                  className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl p-6 mb-6 relative cursor-pointer hover:border-blue-500/50 transition-all"
+                >
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl rounded-xl z-10"></div>
+                  <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg rounded-xl z-10"></div>
+                  
+                  {/* Lock icon */}
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <p className="text-white text-sm font-medium">Premium Feature</p>
+                    </div>
+                  </div>
+                  
+                  {/* Blurred content */}
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center relative z-0 opacity-40 blur-md">
+                    <svg className="w-5 h-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    Interaction Summary
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-0 opacity-40 blur-md">
+                    <div className="text-center p-4 bg-white/10 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{results.interactionStats.totalInteractions}</div>
+                      <div className="text-white/70 text-sm">Total Interactions</div>
+                    </div>
+                    <div className="text-center p-4 bg-white/10 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{results.interactionStats.mutualLikes}</div>
+                      <div className="text-white/70 text-sm">Mutual Likes</div>
+                    </div>
+                    <div className="text-center p-4 bg-white/10 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{results.interactionStats.mutualComments}</div>
+                      <div className="text-white/70 text-sm">Mutual Comments</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+          })()}
 
           {/* Processing Info */}
           <div className="text-sm text-white/60 border-t border-white/10 pt-4">
@@ -270,7 +420,70 @@ const SharedActivity = () => {
                   @{results.userA.username} liked @{results.userB.username}'s posts ({results.likedPosts.userALikedUserBPosts.length})
                 </h5>
                 <div className="space-y-4">
-                  {results.likedPosts.userALikedUserBPosts.map((post, index) => (
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const displayCount = isPremium ? results.likedPosts.userALikedUserBPosts.length : 1;
+                    const postsToShow = results.likedPosts.userALikedUserBPosts.slice(0, displayCount + 1); // +1 to show one blurred
+                    
+                    return postsToShow.map((post, index) => {
+                      const shouldBlur = !isPremium && index >= 1;
+                      
+                      if (shouldBlur) {
+                        // Blurred post for free users
+                        return (
+                          <div
+                            key={post.postId}
+                            onClick={() => setShowUpgradePrompt(true)}
+                            className="bg-white/10 rounded-xl overflow-hidden border border-purple-500/30 relative cursor-pointer hover:border-purple-500/50 transition-all"
+                          >
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10"></div>
+                            <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10"></div>
+                            
+                            {/* Lock icon - centered between border and content */}
+                            <div className="absolute inset-0 flex items-center justify-center z-20 p-4">
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-white text-sm font-medium">Premium</p>
+                              </div>
+                            </div>
+                            
+                            {/* Blurred content */}
+                            <div className="p-4">
+                              <div className="flex opacity-60 blur-sm z-0">
+                                <div className="w-32 h-32 flex-shrink-0">
+                                <img
+                                  src={`https://images.weserv.nl/?url=${encodeURIComponent(post.imageUrl)}`}
+                                  alt={`Post ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.src = `https://ui-avatars.com/api/?name=Post&background=6366f1&color=ffffff&size=128`;
+                                  }}
+                                />
+                              </div>
+                              <div className="p-4 flex-1">
+                                <p className="text-white/80 text-sm mb-2" style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}>
+                                  {post.caption || 'No caption'}
+                                </p>
+                                <p className="text-white/60 text-xs">@{post.code}</p>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Visible post for premium users or first for free users
+                      return (
                     <div key={post.postId} className="bg-white/10 rounded-xl overflow-hidden border border-white/20 hover:border-white/30 hover:bg-white/15 transition-all duration-200 shadow-lg">
                       <div className="flex">
                         <div className="w-32 h-32 flex-shrink-0">
@@ -295,11 +508,39 @@ const SharedActivity = () => {
                           <p className="text-white/60 text-xs">@{post.code}</p>
                         </div>
                       </div>
-                      {index < results.likedPosts.userALikedUserBPosts.length - 1 && (
+                          {index < postsToShow.length - 1 && (
                         <div className="border-t border-white/10 mx-4"></div>
                       )}
                     </div>
-                  ))}
+                      );
+                    });
+                  })()}
+                  
+                  {/* Show more posts button for free users */}
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const totalPosts = results.likedPosts.userALikedUserBPosts.length;
+                    const remainingCount = isPremium ? 0 : Math.max(0, totalPosts - 2); // 1 visible + 1 blurred = 2 shown
+                    
+                    if (!isPremium && totalPosts > 1) {
+                      return (
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="w-full mt-4 py-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-center gap-3 px-6">
+                            <svg className="w-5 h-5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-purple-400 font-semibold text-lg">
+                              +{remainingCount} more posts available - Upgrade to Premium
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
 
@@ -309,7 +550,70 @@ const SharedActivity = () => {
                   @{results.userB.username} liked @{results.userA.username}'s posts ({results.likedPosts.userBLikedUserAPosts.length})
                 </h5>
                 <div className="space-y-4">
-                  {results.likedPosts.userBLikedUserAPosts.map((post, index) => (
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const displayCount = isPremium ? results.likedPosts.userBLikedUserAPosts.length : 1;
+                    const postsToShow = results.likedPosts.userBLikedUserAPosts.slice(0, displayCount + 1); // +1 to show one blurred
+                    
+                    return postsToShow.map((post, index) => {
+                      const shouldBlur = !isPremium && index >= 1;
+                      
+                      if (shouldBlur) {
+                        // Blurred post for free users
+                        return (
+                          <div
+                            key={post.postId}
+                            onClick={() => setShowUpgradePrompt(true)}
+                            className="bg-white/10 rounded-xl overflow-hidden border border-purple-500/30 relative cursor-pointer hover:border-purple-500/50 transition-all"
+                          >
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10"></div>
+                            <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10"></div>
+                            
+                            {/* Lock icon - centered between border and content */}
+                            <div className="absolute inset-0 flex items-center justify-center z-20 p-4">
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-white text-sm font-medium">Premium</p>
+                              </div>
+                            </div>
+                            
+                            {/* Blurred content */}
+                            <div className="p-4">
+                              <div className="flex opacity-60 blur-sm z-0">
+                              <div className="w-32 h-32 flex-shrink-0">
+                                <img
+                                  src={`https://images.weserv.nl/?url=${encodeURIComponent(post.imageUrl)}`}
+                                  alt={`Post ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.src = `https://ui-avatars.com/api/?name=Post&background=ec4899&color=ffffff&size=128`;
+                                  }}
+                                />
+                              </div>
+                              <div className="p-4 flex-1">
+                                <p className="text-white/80 text-sm mb-2" style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}>
+                                  {post.caption || 'No caption'}
+                                </p>
+                                <p className="text-white/60 text-xs">@{post.code}</p>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Visible post
+                      return (
                     <div key={post.postId} className="bg-white/10 rounded-xl overflow-hidden border border-white/20 hover:border-white/30 hover:bg-white/15 transition-all duration-200 shadow-lg">
                       <div className="flex">
                         <div className="w-32 h-32 flex-shrink-0">
@@ -334,11 +638,39 @@ const SharedActivity = () => {
                           <p className="text-white/60 text-xs">@{post.code}</p>
                         </div>
                       </div>
-                      {index < results.likedPosts.userBLikedUserAPosts.length - 1 && (
+                          {index < postsToShow.length - 1 && (
                         <div className="border-t border-white/10 mx-4"></div>
                       )}
                     </div>
-                  ))}
+                      );
+                    });
+                  })()}
+                  
+                  {/* Show more posts button for free users */}
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const totalPosts = results.likedPosts.userBLikedUserAPosts.length;
+                    const remainingCount = isPremium ? 0 : Math.max(0, totalPosts - 2); // 1 visible + 1 blurred = 2 shown
+                    
+                    if (!isPremium && totalPosts > 1) {
+                      return (
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="w-full mt-4 py-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-center gap-3 px-6">
+                            <svg className="w-5 h-5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-purple-400 font-semibold text-lg">
+                              +{remainingCount} more posts available - Upgrade to Premium
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
             </div>
@@ -360,7 +692,70 @@ const SharedActivity = () => {
                   @{results.userA.username} commented on @{results.userB.username}'s posts ({results.commentedPosts.userACommentedOnUserBPosts.length})
                 </h5>
                 <div className="space-y-4">
-                  {results.commentedPosts.userACommentedOnUserBPosts.map((post, index) => (
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const displayCount = isPremium ? results.commentedPosts.userACommentedOnUserBPosts.length : 1;
+                    const postsToShow = results.commentedPosts.userACommentedOnUserBPosts.slice(0, displayCount + 1); // +1 to show one blurred
+                    
+                    return postsToShow.map((post, index) => {
+                      const shouldBlur = !isPremium && index >= 1;
+                      
+                      if (shouldBlur) {
+                        // Blurred post for free users
+                        return (
+                          <div
+                            key={post.postId}
+                            onClick={() => setShowUpgradePrompt(true)}
+                            className="bg-white/10 rounded-xl overflow-hidden border border-purple-500/30 relative cursor-pointer hover:border-purple-500/50 transition-all"
+                          >
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10"></div>
+                            <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10"></div>
+                            
+                            {/* Lock icon - centered between border and content */}
+                            <div className="absolute inset-0 flex items-center justify-center z-20 p-4">
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-white text-sm font-medium">Premium</p>
+                              </div>
+                            </div>
+                            
+                            {/* Blurred content */}
+                            <div className="p-4">
+                              <div className="flex opacity-60 blur-sm z-0">
+                                <div className="w-32 h-32 flex-shrink-0">
+                                <img
+                                  src={`https://images.weserv.nl/?url=${encodeURIComponent(post.imageUrl)}`}
+                                  alt={`Post ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.src = `https://ui-avatars.com/api/?name=Post&background=6366f1&color=ffffff&size=128`;
+                                  }}
+                                />
+                              </div>
+                              <div className="p-4 flex-1">
+                                <p className="text-white/80 text-sm mb-2" style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}>
+                                  {post.caption || 'No caption'}
+                                </p>
+                                <p className="text-white/60 text-xs">@{post.code}</p>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Visible post
+                      return (
                     <div key={post.postId} className="bg-white/10 rounded-xl overflow-hidden border border-white/20 hover:border-white/30 hover:bg-white/15 transition-all duration-200 shadow-lg">
                       <div className="flex">
                         <div className="w-32 h-32 flex-shrink-0">
@@ -385,11 +780,39 @@ const SharedActivity = () => {
                           <p className="text-white/60 text-xs">@{post.code}</p>
                         </div>
                       </div>
-                      {index < results.commentedPosts.userACommentedOnUserBPosts.length - 1 && (
+                          {index < postsToShow.length - 1 && (
                         <div className="border-t border-white/10 mx-4"></div>
                       )}
                     </div>
-                  ))}
+                      );
+                    });
+                  })()}
+                  
+                  {/* Show more posts button for free users */}
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const totalPosts = results.commentedPosts.userACommentedOnUserBPosts.length;
+                    const remainingCount = isPremium ? 0 : Math.max(0, totalPosts - 2); // 1 visible + 1 blurred = 2 shown
+                    
+                    if (!isPremium && totalPosts > 1) {
+                      return (
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="w-full mt-4 py-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-center gap-3 px-6">
+                            <svg className="w-5 h-5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-purple-400 font-semibold text-lg">
+                              {remainingCount > 0 ? `+${remainingCount} more posts` : 'Show all posts'} available - Upgrade to Premium
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
 
@@ -399,7 +822,70 @@ const SharedActivity = () => {
                   @{results.userB.username} commented on @{results.userA.username}'s posts ({results.commentedPosts.userBCommentedOnUserAPosts.length})
                 </h5>
                 <div className="space-y-4">
-                  {results.commentedPosts.userBCommentedOnUserAPosts.map((post, index) => (
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const displayCount = isPremium ? results.commentedPosts.userBCommentedOnUserAPosts.length : 1;
+                    const postsToShow = results.commentedPosts.userBCommentedOnUserAPosts.slice(0, displayCount + 1); // +1 to show one blurred
+                    
+                    return postsToShow.map((post, index) => {
+                      const shouldBlur = !isPremium && index >= 1;
+                      
+                      if (shouldBlur) {
+                        // Blurred post for free users
+                        return (
+                          <div
+                            key={post.postId}
+                            onClick={() => setShowUpgradePrompt(true)}
+                            className="bg-white/10 rounded-xl overflow-hidden border border-purple-500/30 relative cursor-pointer hover:border-purple-500/50 transition-all"
+                          >
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10"></div>
+                            <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10"></div>
+                            
+                            {/* Lock icon - centered between border and content */}
+                            <div className="absolute inset-0 flex items-center justify-center z-20 p-4">
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <p className="text-white text-sm font-medium">Premium</p>
+                              </div>
+                            </div>
+                            
+                            {/* Blurred content */}
+                            <div className="p-4">
+                              <div className="flex opacity-60 blur-sm z-0">
+                              <div className="w-32 h-32 flex-shrink-0">
+                                <img
+                                  src={`https://images.weserv.nl/?url=${encodeURIComponent(post.imageUrl)}`}
+                                  alt={`Post ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.src = `https://ui-avatars.com/api/?name=Post&background=ec4899&color=ffffff&size=128`;
+                                  }}
+                                />
+                              </div>
+                              <div className="p-4 flex-1">
+                                <p className="text-white/80 text-sm mb-2" style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 3,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}>
+                                  {post.caption || 'No caption'}
+                                </p>
+                                <p className="text-white/60 text-xs">@{post.code}</p>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Visible post
+                      return (
                     <div key={post.postId} className="bg-white/10 rounded-xl overflow-hidden border border-white/20 hover:border-white/30 hover:bg-white/15 transition-all duration-200 shadow-lg">
                       <div className="flex">
                         <div className="w-32 h-32 flex-shrink-0">
@@ -424,11 +910,39 @@ const SharedActivity = () => {
                           <p className="text-white/60 text-xs">@{post.code}</p>
                         </div>
                       </div>
-                      {index < results.commentedPosts.userBCommentedOnUserAPosts.length - 1 && (
+                          {index < postsToShow.length - 1 && (
                         <div className="border-t border-white/10 mx-4"></div>
                       )}
                     </div>
-                  ))}
+                      );
+                    });
+                  })()}
+                  
+                  {/* Show more posts button for free users */}
+                  {(() => {
+                    const isPremium = getPlanTier() >= 2;
+                    const totalPosts = results.commentedPosts.userBCommentedOnUserAPosts.length;
+                    const remainingCount = isPremium ? 0 : Math.max(0, totalPosts - 2); // 1 visible + 1 blurred = 2 shown
+                    
+                    if (!isPremium && totalPosts > 1) {
+                      return (
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="w-full mt-4 py-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-center gap-3 px-6">
+                            <svg className="w-5 h-5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-purple-400 font-semibold text-lg">
+                              {remainingCount > 0 ? `+${remainingCount} more posts` : 'Show all posts'} available - Upgrade to Premium
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
             </div>

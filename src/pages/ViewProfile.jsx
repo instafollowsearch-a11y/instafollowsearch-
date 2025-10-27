@@ -185,18 +185,65 @@ const ViewProfile = () => {
   const memoizedMediaGrid = useMemo(() => {
     if (!profile?.medias) return null;
     
-    return profile.medias.map((m) => (
+    const isPremium = getPlanTier() >= 2;
+    const visibleCount = isPremium ? profile.medias.length : 3;
+    const blurredCount = isPremium ? 0 : 6;
+    const totalToShow = visibleCount + blurredCount;
+    const postsToShow = profile.medias.slice(0, totalToShow);
+    
+    return postsToShow.map((m, index) => {
+      const shouldBlur = !isPremium && index >= visibleCount;
+      
+      if (shouldBlur) {
+        return (
       <div
         key={m.id}
         className="relative group aspect-square overflow-hidden bg-black cursor-pointer"
-        onClick={() => {
-          console.log('Selected media:', m);
-          console.log('Likers list:', m.likersList);
-          console.log('Comments list:', m.commentsList);
-          setSelectedMedia(m);
-          setIsMediaOpen(true);
-        }}
+        onClick={() => setShowUpgradePrompt(true)}
       >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl z-10"></div>
+        <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg z-10"></div>
+        
+        {/* Lock icon - centered */}
+        <div className="absolute inset-0 flex items-center justify-center z-20 px-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <p className="text-white text-lg font-semibold">Premium Feature</p>
+          </div>
+        </div>
+        
+        {/* Blurred content */}
+        <div className="opacity-60 blur-sm">
+          <img
+            src={proxy(m.thumb)}
+            alt="media"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = `https://via.placeholder.com/800/111827/FFFFFF?text=Media`;
+            }}
+          />
+        </div>
+      </div>
+        );
+      }
+      
+      return (
+        <div
+          key={m.id}
+          className="relative group aspect-square overflow-hidden bg-black cursor-pointer"
+          onClick={() => {
+            console.log('Selected media:', m);
+            console.log('Likers list:', m.likersList);
+            console.log('Comments list:', m.commentsList);
+            setSelectedMedia(m);
+            setIsMediaOpen(true);
+          }}
+        >
         <img
           src={proxy(m.thumb)}
           alt="media"
@@ -242,14 +289,19 @@ const ViewProfile = () => {
             </div>
         </div>
       </div>
-    ));
-  }, [profile?.medias, proxy]);
+      );
+    });
+  }, [profile?.medias, proxy, getPlanTier]);
 
   // Memoize followers list to prevent re-renders and ensure proxy works
   const memoizedFollowers = useMemo(() => {
     if (!followers || followers.length === 0) return null;
     
-    return followers.map((follower, index) => (
+    const isPremium = getPlanTier() >= 2;
+    const visibleCount = isPremium ? followers.length : 2;
+    const followersToShow = followers.slice(0, visibleCount);
+    
+    return followersToShow.map((follower, index) => (
       <div key={follower.id || index} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
         <div className="relative w-12 h-12">
           <img
@@ -281,13 +333,17 @@ const ViewProfile = () => {
         </div>
       </div>
     ));
-  }, [followers, proxy]);
+  }, [followers, proxy, getPlanTier]);
 
   // Memoize following list to prevent re-renders and ensure proxy works
   const memoizedFollowing = useMemo(() => {
     if (!following || following.length === 0) return null;
     
-    return following.map((follow, index) => (
+    const isPremium = getPlanTier() >= 2;
+    const visibleCount = isPremium ? following.length : 2;
+    const followingToShow = following.slice(0, visibleCount);
+    
+    return followingToShow.map((follow, index) => (
       <div key={follow.id || index} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
         <div className="relative w-12 h-12">
           <img
@@ -319,7 +375,7 @@ const ViewProfile = () => {
         </div>
       </div>
     ));
-  }, [following, proxy]);
+  }, [following, proxy, getPlanTier]);
 
   // Load more followers
   const loadMoreFollowers = async () => {
@@ -396,13 +452,6 @@ const ViewProfile = () => {
     setFollowingNextPageId(null);
     setMediasNextPageId(null);
     setActiveTab('posts');
-    
-    // Check subscription for View Profile feature
-    const planTier = getPlanTier();
-    if (planTier < 2) {
-      setShowUpgradePrompt(true);
-      return;
-    }
     
     const handle = username.trim().replace(/^@+/, '');
     
@@ -652,29 +701,52 @@ const ViewProfile = () => {
                   {memoizedMediaGrid}
                 </div>
                 
-                {/* Load More Button for Posts */}
-                {console.log('Rendering Load More button. mediasNextPageId:', mediasNextPageId, 'isLoadingMoreMedias:', isLoadingMoreMedias)}
-                {mediasNextPageId && (
-                  <div className="flex justify-center pt-4">
-                    <button
-                      onClick={loadMoreMedias}
-                      disabled={isLoadingMoreMedias}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      {isLoadingMoreMedias ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                {/* Load More / Upgrade Banner for Posts */}
+                {(() => {
+                  const isPremium = getPlanTier() >= 2;
+                  const totalPosts = profile?.medias?.length || 0;
+                  const visiblePosts = isPremium ? totalPosts : 3;
+                  const remainingPosts = Math.max(0, totalPosts - visiblePosts);
+                  
+                  if (isPremium && mediasNextPageId) {
+                    return (
+                      <div className="flex justify-center pt-4">
+                        <button
+                          onClick={loadMoreMedias}
+                          disabled={isLoadingMoreMedias}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          {isLoadingMoreMedias ? (
+                            <>
+                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                              </svg>
+                              Loading...
+                            </>
+                          ) : (
+                            'Load More Posts'
+                          )}
+                        </button>
+                      </div>
+                    );
+                  } else if (!isPremium && remainingPosts > 0) {
+                    return (
+                      <div className="flex justify-center pt-4">
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="px-6 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 text-white rounded-lg transition-all flex items-center gap-3"
+                        >
+                          <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
-                          Loading...
-                        </>
-                      ) : (
-                        'Load More Posts'
-                      )}
-                    </button>
-                  </div>
-                )}
+                          <span>{remainingPosts} more posts available - Upgrade to Premium</span>
+                        </button>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             )}
             
@@ -684,28 +756,52 @@ const ViewProfile = () => {
                   {memoizedFollowers}
                 </div>
                 
-                {/* Load More Button for Followers */}
-                {followersNextPageId && (
-                  <div className="flex justify-center pt-4">
-                    <button
-                      onClick={loadMoreFollowers}
-                      disabled={isLoadingMore}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      {isLoadingMore ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                {/* Load More / Upgrade Banner for Followers */}
+                {(() => {
+                  const isPremium = getPlanTier() >= 2;
+                  const totalFollowers = followers?.length || 0;
+                  const visibleFollowers = isPremium ? totalFollowers : 2;
+                  const remainingFollowers = Math.max(0, totalFollowers - visibleFollowers);
+                  
+                  if (isPremium && followersNextPageId) {
+                    return (
+                      <div className="flex justify-center pt-4">
+                        <button
+                          onClick={loadMoreFollowers}
+                          disabled={isLoadingMore}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          {isLoadingMore ? (
+                            <>
+                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                              </svg>
+                              Loading...
+                            </>
+                          ) : (
+                            'Load More Followers'
+                          )}
+                        </button>
+                      </div>
+                    );
+                  } else if (!isPremium && (remainingFollowers > 0 || followersNextPageId)) {
+                    return (
+                      <div className="flex justify-center pt-4">
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="px-6 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 text-white rounded-lg transition-all flex items-center gap-3"
+                        >
+                          <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
-                          Loading...
-                        </>
-                      ) : (
-                        'Load More Followers'
-                      )}
-                    </button>
-                  </div>
-                )}
+                          <span>{remainingFollowers > 0 ? `${remainingFollowers} more followers` : 'More followers'} available - Upgrade to Premium</span>
+                        </button>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             )}
             
@@ -715,28 +811,52 @@ const ViewProfile = () => {
                   {memoizedFollowing}
                 </div>
                 
-                {/* Load More Button for Following */}
-                {followingNextPageId && (
-                  <div className="flex justify-center pt-4">
-                    <button
-                      onClick={loadMoreFollowing}
-                      disabled={isLoadingMore}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      {isLoadingMore ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                {/* Load More / Upgrade Banner for Following */}
+                {(() => {
+                  const isPremium = getPlanTier() >= 2;
+                  const totalFollowing = following?.length || 0;
+                  const visibleFollowing = isPremium ? totalFollowing : 2;
+                  const remainingFollowing = Math.max(0, totalFollowing - visibleFollowing);
+                  
+                  if (isPremium && followingNextPageId) {
+                    return (
+                      <div className="flex justify-center pt-4">
+                        <button
+                          onClick={loadMoreFollowing}
+                          disabled={isLoadingMore}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          {isLoadingMore ? (
+                            <>
+                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                              </svg>
+                              Loading...
+                            </>
+                          ) : (
+                            'Load More Following'
+                          )}
+                        </button>
+                      </div>
+                    );
+                  } else if (!isPremium && (remainingFollowing > 0 || followingNextPageId)) {
+                    return (
+                      <div className="flex justify-center pt-4">
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="px-6 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30 hover:border-purple-500/50 text-white rounded-lg transition-all flex items-center gap-3"
+                        >
+                          <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
-                          Loading...
-                        </>
-                      ) : (
-                        'Load More Following'
-                      )}
-                    </button>
-                  </div>
-                )}
+                          <span>{remainingFollowing > 0 ? `${remainingFollowing} more following` : 'More following'} available - Upgrade to Premium</span>
+                        </button>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             )}
           </div>

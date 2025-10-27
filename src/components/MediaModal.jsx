@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import apiService from '../services/api';
+import { useSubscription } from '../contexts/SubscriptionContext';
+import SubscriptionUpgradePrompt from './SubscriptionUpgradePrompt';
 
 const MediaModal = ({ isOpen, onClose, media, profile }) => {
+  const { getPlanTier } = useSubscription();
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState('media');
@@ -25,6 +29,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
       setIsFetchingLikers(false);
       setIsFetchingComments(false);
       setShowDownloadMenu(false);
+      setShowUpgradePrompt(false);
     }
   }, [isOpen]);
 
@@ -461,27 +466,53 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
           <div className="max-h-[70vh] overflow-auto bg-slate-800/50">
             <div className="p-4">
               <div className="space-y-3">
-                {likers.length === 0 && (
-                  <div className="flex justify-center py-4">
-                    <button
-                      onClick={fetchLikers}
-                      disabled={isFetchingLikers}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      {isFetchingLikers ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                {likers.length === 0 && (() => {
+                  const isPremium = getPlanTier() >= 2;
+                  
+                  if (!isPremium) {
+                    return (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
-                          Fetching Likers...
-                        </>
-                      ) : (
-                        'Fetch Likers'
-                      )}
-                    </button>
-                  </div>
-                )}
+                        </div>
+                        <p className="text-white text-lg font-semibold mb-2">Premium Feature</p>
+                        <p className="text-white/70 text-sm text-center mb-4">
+                          Upgrade to Premium to see who liked this post
+                        </p>
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all flex items-center gap-2"
+                        >
+                          Upgrade to Premium
+                        </button>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="flex justify-center py-4">
+                      <button
+                        onClick={fetchLikers}
+                        disabled={isFetchingLikers}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        {isFetchingLikers ? (
+                          <>
+                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                            Fetching Likers...
+                          </>
+                        ) : (
+                          'Fetch Likers'
+                        )}
+                      </button>
+                    </div>
+                  );
+                })()}
                 {(likers || []).map((liker, index) => (
                   <div key={liker.id || index} className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg">
                     <div className="relative w-10 h-10">
@@ -530,27 +561,53 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
           <div className="max-h-[70vh] overflow-auto bg-slate-800/50">
             <div className="p-4">
               <div className="space-y-4">
-                {comments.length === 0 && (
-                  <div className="flex justify-center py-4">
-                    <button
-                      onClick={fetchComments}
-                      disabled={isFetchingComments}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      {isFetchingComments ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                {comments.length === 0 && (() => {
+                  const isPremium = getPlanTier() >= 2;
+                  
+                  if (!isPremium) {
+                    return (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
-                          Fetching Comments...
-                        </>
-                      ) : (
-                        'Fetch Comments'
-                      )}
-                    </button>
-                  </div>
-                )}
+                        </div>
+                        <p className="text-white text-lg font-semibold mb-2">Premium Feature</p>
+                        <p className="text-white/70 text-sm text-center mb-4">
+                          Upgrade to Premium to see comments on this post
+                        </p>
+                        <button
+                          onClick={() => setShowUpgradePrompt(true)}
+                          className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all flex items-center gap-2"
+                        >
+                          Upgrade to Premium
+                        </button>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="flex justify-center py-4">
+                      <button
+                        onClick={fetchComments}
+                        disabled={isFetchingComments}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors flex items-center gap-2"
+                      >
+                        {isFetchingComments ? (
+                          <>
+                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                            Fetching Comments...
+                          </>
+                        ) : (
+                          'Fetch Comments'
+                        )}
+                      </button>
+                    </div>
+                  );
+                })()}
                 {(comments || []).map((comment, index) => (
                   <div key={comment.id || index} className="bg-slate-700/50 rounded-lg p-4">
                     <div className="flex items-start gap-3">
@@ -736,6 +793,14 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
           </div>
         )}
       </div>
+      
+      {/* Subscription Upgrade Prompt */}
+      <SubscriptionUpgradePrompt
+        isOpen={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        feature="Media Likers & Comments"
+        description="Access post likers and comments to see detailed engagement analytics"
+      />
     </div>
   );
 };

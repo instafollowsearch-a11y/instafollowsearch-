@@ -36,12 +36,6 @@ const Admirers = () => {
       return;
     }
 
-    // Check if user has Premium subscription (tier 2+)
-    if (getPlanTier() < 2) {
-      setShowUpgradePrompt(true);
-      return;
-    }
-
     const cleanUsername = username.trim().replace(/^@+/, '');
     setIsLoading(true);
     setError('');
@@ -256,76 +250,206 @@ const Admirers = () => {
             </h2>
             
             <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
-              {/* Virtual scrolling container */}
-              <div 
-                className="overflow-auto"
-                style={{ height: `${Math.min(containerHeight, admirers.length * ITEM_HEIGHT)}px` }}
-                onScroll={handleScroll}
-              >
-                {/* Total height spacer */}
-                <div style={{ height: `${admirers.length * ITEM_HEIGHT}px`, position: 'relative' }}>
-                  {/* Visible items */}
-                  <div 
-                    style={{ 
-                      position: 'absolute', 
-                      top: `${visibleRange.startIndex * ITEM_HEIGHT}px`,
-                      width: '100%'
-                    }}
-                  >
-                    {visibleAdmirers.map((admirer, index) => {
-                      const actualIndex = visibleRange.startIndex + index;
-                      return (
-                        <div 
-                          key={admirer.id || `${admirer.username}-${actualIndex}`}
-                          className={`flex items-center justify-between p-6 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors ${
-                            actualIndex % 2 === 0 ? 'bg-white/2' : 'bg-transparent'
-                          }`}
-                          style={{ height: `${ITEM_HEIGHT}px` }}
-                        >
-                          <div className="flex items-center space-x-4">
-                            {/* Rank */}
-                            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                              {admirer.rank || actualIndex + 1}
-                            </div>
-                            
-                            {/* Profile Picture */}
-                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
-                              <img 
-                                src={proxy(admirer.profilePicUrl)}
-                                alt={admirer.username}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                                onError={(e) => {
-                                  // Fallback to placeholder if proxy fails
-                                  e.target.src = `https://via.placeholder.com/48x48/4F46E5/FFFFFF?text=${admirer.username.charAt(0).toUpperCase()}`;
-                                }}
-                              />
-                            </div>
-                            
-                            {/* Username and Stats */}
-                            <div>
-                              <h3 className="text-white font-semibold text-lg">
-                                {admirer.username}
-                              </h3>
-                              <p className="text-white/70 text-sm">
-                                Liked {admirer.likePercentage}% of their posts.
-                              </p>
-                            </div>
-                          </div>
-                          
-                          {/* View Button */}
-                          <button
-                            onClick={() => handleViewProfile(admirer.username)}
-                            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105"
+              {/* Check if user has premium access */}
+              {(() => {
+                const isPremium = getPlanTier() >= 2;
+                const displayCount = isPremium ? admirers.length : 2;
+                const remainingCount = isPremium ? 0 : admirers.length - displayCount;
+                
+                return (
+                  <>
+                    {/* Premium users see all with virtual scrolling */}
+                    {isPremium ? (
+                      <div 
+                        className="overflow-auto"
+                        style={{ height: `${Math.min(containerHeight, admirers.length * ITEM_HEIGHT)}px` }}
+                        onScroll={handleScroll}
+                      >
+                        {/* Total height spacer */}
+                        <div style={{ height: `${admirers.length * ITEM_HEIGHT}px`, position: 'relative' }}>
+                          {/* Visible items */}
+                          <div 
+                            style={{ 
+                              position: 'absolute', 
+                              top: `${visibleRange.startIndex * ITEM_HEIGHT}px`,
+                              width: '100%'
+                            }}
                           >
-                            View →
-                          </button>
+                            {visibleAdmirers.map((admirer, index) => {
+                              const actualIndex = visibleRange.startIndex + index;
+                              return (
+                                <div 
+                                  key={admirer.id || `${admirer.username}-${actualIndex}`}
+                                  className={`flex items-center justify-between p-6 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors ${
+                                    actualIndex % 2 === 0 ? 'bg-white/2' : 'bg-transparent'
+                                  }`}
+                                  style={{ height: `${ITEM_HEIGHT}px` }}
+                                >
+                                  <div className="flex items-center space-x-4">
+                                    {/* Rank */}
+                                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                      {admirer.rank || actualIndex + 1}
+                                    </div>
+                                    
+                                    {/* Profile Picture */}
+                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
+                                      <img 
+                                        src={proxy(admirer.profilePicUrl)}
+                                        alt={admirer.username}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                        onError={(e) => {
+                                          // Fallback to placeholder if proxy fails
+                                          e.target.src = `https://via.placeholder.com/48x48/4F46E5/FFFFFF?text=${admirer.username.charAt(0).toUpperCase()}`;
+                                        }}
+                                      />
+                                    </div>
+                                    
+                                    {/* Username and Stats */}
+                                    <div>
+                                      <h3 className="text-white font-semibold text-lg">
+                                        {admirer.username}
+                                      </h3>
+                                      <p className="text-white/70 text-sm">
+                                        Liked {admirer.likePercentage}% of their posts.
+                                      </p>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* View Button */}
+                                  <button
+                                    onClick={() => handleViewProfile(admirer.username)}
+                                    className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105"
+                                  >
+                                    View →
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+                      </div>
+                    ) : (
+                      /* Free users see first 2 visible, third one blurred, rest hidden */
+                      <div className="space-y-0">
+                        {admirers.slice(0, 3).map((admirer, idx) => {
+                          if (idx < 2) {
+                            // First 2 admirers - visible
+                            return (
+                              <div 
+                                key={admirer.id || `${admirer.username}-${idx}`}
+                                className={`flex items-center justify-between p-6 border-b border-white/10 hover:bg-white/5 transition-colors ${
+                                  idx % 2 === 0 ? 'bg-white/2' : 'bg-transparent'
+                                }`}
+                              >
+                                <div className="flex items-center space-x-4">
+                                  {/* Rank */}
+                                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {admirer.rank || idx + 1}
+                                  </div>
+                                  
+                                  {/* Profile Picture */}
+                                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
+                                    <img 
+                                      src={proxy(admirer.profilePicUrl)}
+                                      alt={admirer.username}
+                                      className="w-full h-full object-cover"
+                                      loading="lazy"
+                                      onError={(e) => {
+                                        e.target.src = `https://via.placeholder.com/48x48/4F46E5/FFFFFF?text=${admirer.username.charAt(0).toUpperCase()}`;
+                                      }}
+                                    />
+                                  </div>
+                                  
+                                  {/* Username and Stats */}
+                                  <div>
+                                    <h3 className="text-white font-semibold text-lg">
+                                      {admirer.username}
+                                    </h3>
+                                    <p className="text-white/70 text-sm">
+                                      Liked {admirer.likePercentage}% of their posts.
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                {/* View Button */}
+                                <button
+                                  onClick={() => handleViewProfile(admirer.username)}
+                                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105"
+                                >
+                                  View →
+                                </button>
+                              </div>
+                            );
+                          } else {
+                            // Third admirer - blurred with locked icon
+                            return (
+                              <div 
+                                key={admirer.id || `${admirer.username}-${idx}`}
+                                onClick={() => setShowUpgradePrompt(true)}
+                                className="flex items-center justify-between p-6 border-b border-purple-500/20 relative overflow-hidden bg-gradient-to-r from-purple-500/10 to-pink-500/10 cursor-pointer hover:opacity-90 transition-all"
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 backdrop-blur-xl"></div>
+                                <div className="absolute inset-0 bg-purple-900/40 backdrop-blur-lg"></div>
+                                <div className="absolute inset-0 flex items-center justify-center z-20 px-6">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                      </svg>
+                                    </div>
+                                    <p className="text-white text-lg font-semibold">Premium Feature</p>
+                                  </div>
+                                </div>
+                                <div className="relative z-10 opacity-60 flex items-center space-x-4 flex-1">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm blur-sm">
+                                    {admirer.rank || idx + 1}
+                                  </div>
+                                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 blur-sm">
+                                    <img 
+                                      src={proxy(admirer.profilePicUrl)}
+                                      alt={admirer.username}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        e.target.src = `https://via.placeholder.com/48x48/4F46E5/FFFFFF?text=${admirer.username.charAt(0).toUpperCase()}`;
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="blur-sm">
+                                    <h3 className="text-white font-semibold text-lg">
+                                      {admirer.username}
+                                    </h3>
+                                    <p className="text-white/70 text-sm">
+                                      Liked {admirer.likePercentage}% of their posts.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                        })}
+                        
+                        {/* Upgrade prompt for remaining admirers */}
+                        {remainingCount > 0 && (
+                          <button
+                            onClick={() => setShowUpgradePrompt(true)}
+                            className="w-full py-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-t border-purple-500/30 text-center hover:from-purple-500/30 hover:to-pink-500/30 transition-all duration-200"
+                          >
+                            <div className="flex items-center justify-center gap-3">
+                              <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-purple-400 font-semibold text-lg">
+                                +{remainingCount} more admirers available - Upgrade to Premium
+                              </span>
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
