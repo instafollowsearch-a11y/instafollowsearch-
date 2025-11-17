@@ -34,11 +34,32 @@ const SharedActivity = () => {
     const mutualLikes = userALikesOnUserBPosts + userBLikesOnUserAPosts;
     const mutualComments = userACommentsOnUserBPosts + userBCommentsOnUserAPosts;
     
+    // Determine relationship type
+    const isMutual = data.isFirstFollowingSecond && data.isSecondFollowingFirst;
+    const isOneWay = (data.isFirstFollowingSecond && !data.isSecondFollowingFirst) || 
+                     (!data.isFirstFollowingSecond && data.isSecondFollowingFirst);
+    const isNotFollowing = !data.isFirstFollowingSecond && !data.isSecondFollowingFirst;
+    
+    let relationshipType, relationshipStatus;
+    if (isMutual) {
+      relationshipType = "mutual_following";
+      relationshipStatus = "Following each other";
+    } else if (isOneWay) {
+      relationshipType = "one_way_following";
+      relationshipStatus = "One-way following";
+    } else {
+      relationshipType = "not_following";
+      relationshipStatus = "Not following";
+    }
+    
     return {
       relationship: {
-        type: data.isFirstFollowingSecond && data.isSecondFollowingFirst ? "mutual_following" : "one_way_following",
+        type: relationshipType,
         sinceDate: data.sinceDate || "2024-01-15",
-        status: data.isFirstFollowingSecond && data.isSecondFollowingFirst ? "Following each other" : "One-way following"
+        status: relationshipStatus,
+        // Store following direction for one-way relationships
+        isFirstFollowingSecond: data.isFirstFollowingSecond || false,
+        isSecondFollowingFirst: data.isSecondFollowingFirst || false
       },
       userA: {
         username: username1 || firstUser.username,
@@ -135,7 +156,13 @@ const SharedActivity = () => {
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-2">
-                @{results.userA.username} and @{results.userB.username} are following each other
+                {results.relationship.type === "mutual_following" 
+                  ? `@${results.userA.username} and @${results.userB.username} are following each other`
+                  : results.relationship.type === "one_way_following"
+                    ? results.relationship.isFirstFollowingSecond && !results.relationship.isSecondFollowingFirst
+                      ? `@${results.userA.username} is following @${results.userB.username}`
+                      : `@${results.userB.username} is following @${results.userA.username}`
+                    : `@${results.userA.username} and @${results.userB.username} are not following each other`}
               </h3>
               {/* <p className="text-white/70">
                 Since {new Date(results.relationship.sinceDate).toLocaleDateString()}
