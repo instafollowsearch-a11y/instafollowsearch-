@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import apiService from '../services/api';
+import apiService, { getProxyImageUrl } from '../services/api';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import SubscriptionUpgradePrompt from './SubscriptionUpgradePrompt';
 
@@ -183,7 +183,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
     try {
       const currentMedia = getCurrentMedia();
       const imageUrl = currentMedia.thumb || currentMedia.url || currentMedia.image || currentMedia.videoUrl;
-      const proxiedUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      const proxiedUrl = getProxyImageUrl(imageUrl);
       
       const response = await fetch(proxiedUrl);
       const blob = await response.blob();
@@ -208,7 +208,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
   const handleDownloadItem = async (item) => {
     try {
       const srcUrl = item.thumb || item.url || item.image || item.videoUrl;
-      const proxiedUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(srcUrl)}`;
+      const proxiedUrl = getProxyImageUrl(srcUrl);
 
       const response = await fetch(proxiedUrl);
       const blob = await response.blob();
@@ -252,7 +252,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                 {/* Original poster */}
                 <div className="relative w-9 h-9">
                   <img
-                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(media.originalUser?.profile_pic_url || '')}`}
+                    src={getProxyImageUrl(media.originalUser?.profile_pic_url || '')}
                     alt={media.originalUser?.username}
                     className="absolute inset-0 w-full h-full rounded-full object-cover bg-slate-800"
                     onError={(e) => {
@@ -275,7 +275,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                     <div key={index} className="flex items-center gap-1">
                       <div className="relative w-7 h-7">
                         <img
-                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(collaborator?.profile_pic_url || '')}`}
+                          src={getProxyImageUrl(collaborator?.profile_pic_url || '')}
                           alt={collaborator?.username}
                           className="absolute inset-0 w-full h-full rounded-full object-cover bg-slate-800"
                           onError={(e) => {
@@ -299,7 +299,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
               <>
                 <div className="relative w-9 h-9">
                   <img
-                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(profile?.profilePicUrl || '')}`}
+                    src={getProxyImageUrl(profile?.profilePicUrl || '')}
                     alt={profile?.username}
                     className="absolute inset-0 w-full h-full rounded-full object-cover bg-slate-800"
                     onError={(e) => {
@@ -398,7 +398,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
             <div className="relative">
               <video
                 ref={videoRef}
-                src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(currentMedia.videoUrl)}`}
+                src={getProxyImageUrl(currentMedia.videoUrl)}
                 className="w-full h-auto max-h-[70vh] object-contain"
                 controls={false}
                 onEnded={handleVideoEnded}
@@ -433,7 +433,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
             </div>
           ) : (
             <img
-              src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(currentMedia.thumb || currentMedia.url || currentMedia.image)}`}
+              src={getProxyImageUrl(currentMedia.thumb || currentMedia.url || currentMedia.image)}
               alt="media"
               className="w-full h-auto max-h-[70vh] object-contain"
               onError={(e) => {
@@ -517,7 +517,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                   <div key={liker.id || index} className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg">
                     <div className="relative w-10 h-10">
                       <img
-                        src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(liker.profilePicUrl || '')}`}
+                        src={getProxyImageUrl(liker.profilePicUrl || '')}
                         alt={liker.username}
                         className="w-full h-full rounded-full object-cover bg-slate-600"
                         onError={(e) => {
@@ -613,7 +613,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                     <div className="flex items-start gap-3">
                       <div className="relative w-8 h-8 flex-shrink-0">
                         <img
-                          src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(comment.user.profilePicUrl || '')}`}
+                          src={getProxyImageUrl(comment.user.profilePicUrl || '')}
                           alt={comment.user.username}
                           className="w-full h-full rounded-full object-cover bg-slate-600"
                           onError={(e) => {
@@ -658,7 +658,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                               <div key={child.id || childIndex} className="flex items-start gap-2">
                                 <div className="relative w-6 h-6 flex-shrink-0">
                                   <img
-                                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(child.user.profilePicUrl || '')}`}
+                                    src={getProxyImageUrl(child.user.profilePicUrl || '')}
                                     alt={child.user.username}
                                     className="w-full h-full rounded-full object-cover bg-slate-600"
                                     onError={(e) => {
@@ -774,7 +774,7 @@ const MediaModal = ({ isOpen, onClose, media, profile }) => {
                             </div>
                           ) : (
                             <img
-                              src={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/instagram/proxy-image?url=${encodeURIComponent(item.thumb || item.url || item.image)}`}
+                              src={getProxyImageUrl(item.thumb || item.url || item.image)}
                               alt={`item-${idx}`}
                               className="w-full h-full object-cover"
                             />

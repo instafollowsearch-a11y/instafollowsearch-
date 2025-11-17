@@ -1,4 +1,13 @@
+// Production: 'https://backend-wr1l.onrender.com/api'
 const API_BASE_URL = 'https://backend-wr1l.onrender.com/api';
+
+// Helper function to construct proxy image URLs
+// Use this function in components to get consistent proxy URLs
+const getProxyImageUrl = (imageUrl) => {
+  if (!imageUrl) return '';
+  const baseUrl = API_BASE_URL;
+  return `${baseUrl}/instagram/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+};
 
 class ApiService {
   constructor() {
@@ -256,5 +265,5 @@ class ApiService {
 
 }
 
-export { API_BASE_URL };
+export { API_BASE_URL, getProxyImageUrl };
 export default new ApiService(); 
