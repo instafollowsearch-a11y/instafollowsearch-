@@ -78,26 +78,6 @@ const Header = () => {
     window.location.reload()
   }
 
-  const scrollToSection = (sectionId) => {
-    // Check if we're on the homepage
-    if (location.pathname === '/') {
-      // On homepage, just scroll to the section
-      const element = document.getElementById(sectionId)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' })
-      }
-    } else {
-      // Not on homepage, navigate to homepage and then scroll
-      navigate('/')
-      // Use setTimeout to ensure navigation completes before scrolling
-      setTimeout(() => {
-        const element = document.getElementById(sectionId)
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' })
-        }
-      }, 100)
-    }
-  }
 
   const scrollToTop = () => {
     // Check if we're on the homepage
@@ -131,34 +111,40 @@ const Header = () => {
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               <button 
-                onClick={() => scrollToSection('hero')}
+                onClick={() => navigate('/Home')}
                 className="text-white/90 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Home
               </button>
               <button 
-                onClick={() => scrollToSection('features')}
+                onClick={() => navigate('/Features')}
                 className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Features
               </button>
               <button 
-                onClick={() => navigate('/pricing')}
+                onClick={() => navigate('/Pricing')}
                 className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Pricing
               </button>
               <button 
-                onClick={() => scrollToSection('how-it-works')}
+                onClick={() => navigate('/how-it-works')}
                 className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 How It Works
               </button>
               <button 
-                onClick={() => scrollToSection('faq')}
+                onClick={() => navigate('/FAQ')}
                 className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 FAQ
+              </button>
+              <button 
+                onClick={() => navigate('/blog')}
+                className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Blog
               </button>
             </div>
           </div>
@@ -220,34 +206,40 @@ const Header = () => {
         <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white/10 backdrop-blur-md rounded-lg mt-2">
             <button 
-              onClick={() => scrollToSection('hero')}
+              onClick={() => { navigate('/Home'); setIsMenuOpen(false); }}
               className="text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Home
             </button>
             <button 
-              onClick={() => scrollToSection('features')}
+              onClick={() => { navigate('/Features'); setIsMenuOpen(false); }}
               className="text-white/70 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Features
             </button>
             <button 
-              onClick={() => navigate('/pricing')}
+              onClick={() => { navigate('/Pricing'); setIsMenuOpen(false); }}
               className="text-white/70 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               Pricing
             </button>
             <button 
-              onClick={() => scrollToSection('how-it-works')}
+              onClick={() => { navigate('/how-it-works'); setIsMenuOpen(false); }}
               className="text-white/70 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               How It Works
             </button>
             <button 
-              onClick={() => scrollToSection('faq')}
+              onClick={() => { navigate('/FAQ'); setIsMenuOpen(false); }}
               className="text-white/70 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >
               FAQ
+            </button>
+            <button 
+              onClick={() => { navigate('/blog'); setIsMenuOpen(false); }}
+              className="text-white/70 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+            >
+              Blog
             </button>
             {apiService.isAuthenticated() ? (
               <>

@@ -154,7 +154,7 @@ const Pricing = () => {
     {
       name: 'Basic',
       description: 'Essential features for personal use',
-      priceId: livePriceIds.basic,
+      priceId: testPriceIds.basic,
       price: {
         weekly: 5,
         monthly: 20
@@ -167,12 +167,12 @@ const Pricing = () => {
       popular: false,
       buttonText: 'Start Basic',
       buttonStyle: 'bg-white/10 hover:bg-white/20 text-white border border-white/20',
-      stripeId: livePriceIds.basic
+      stripeId: testPriceIds.basic
     },
     {
       name: 'Premium',
       description: 'Advanced features for power users',
-      priceId: livePriceIds.premium,
+      priceId: testPriceIds.premium,
       price: {
         weekly: 12,
         monthly: 48
@@ -188,12 +188,12 @@ const Pricing = () => {
       popular: true,
       buttonText: 'Start Premium',
       buttonStyle: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600',
-      stripeId: livePriceIds.premium
+      stripeId: testPriceIds.premium
     },
     {
       name: 'Pro',
       description: 'Professional features for businesses',
-      priceId: livePriceIds.pro,
+      priceId: testPriceIds.pro,
       price: {
         weekly: 50,
         monthly: 200
@@ -206,7 +206,7 @@ const Pricing = () => {
       popular: false,
       buttonText: 'Coming Soon',
       buttonStyle: 'bg-gray-500/20 text-gray-400 cursor-not-allowed',
-      stripeId: livePriceIds.pro,
+      stripeId: testPriceIds.pro,
       disabled: true
     }
   ]

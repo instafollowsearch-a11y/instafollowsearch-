@@ -1,4 +1,4 @@
-// Production: 'https://backend-wr1l.onrender.com/api'
+// Production API URL
 const API_BASE_URL = 'https://backend-wr1l.onrender.com/api';
 
 // Helper function to construct proxy image URLs

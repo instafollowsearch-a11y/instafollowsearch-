@@ -8,6 +8,7 @@ import PageNavigation from '../components/PageNavigation';
 import AuthModal from '../components/AuthModal.jsx';
 import SubscriptionUpgradePrompt from '../components/SubscriptionUpgradePrompt';
 import SEO from '../components/SEO.jsx';
+import SITE_CONFIG from '../config/site';
 
 const Admirers = () => {
   const [username, setUsername] = useState('');
@@ -162,7 +163,7 @@ const Admirers = () => {
         title="Instagram Admirers - Find Who Likes Your Posts Most | InstaFollowCheck"
         description="Discover your biggest Instagram admirers! Find out who likes your posts most often with our advanced analytics tool. Get detailed insights into your most engaged followers."
         keywords="instagram admirers, instagram likes, instagram analytics, social media insights, follower engagement, instagram tools"
-        url="https://instafollowcheck.com/admirers"
+        canonicalUrl={SITE_CONFIG.getUrl('/admirers')}
       />
       <Header />
       <PageNavigation />

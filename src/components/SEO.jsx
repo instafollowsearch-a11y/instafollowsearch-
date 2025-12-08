@@ -1,16 +1,24 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import SITE_CONFIG from '../config/site';
 
 const SEO = ({ 
   title = "FollowerSearch - Instagram Followers Analytics & Search Tool",
   description = "Find and analyze Instagram followers with our powerful search tool. Get detailed analytics, follower insights, and growth strategies for your Instagram account.",
   keywords = "instagram followers, instagram analytics, instagram search, social media tools, instagram growth, follower analysis",
   image = "/og-image.png",
-  url = "https://instarecentfollow.com"
+  url = null,
+  canonicalUrl = null
 }) => {
+  // Use site config if URL not provided
+  const baseUrl = url || SITE_CONFIG.getBaseUrl();
   const location = useLocation();
 
   useEffect(() => {
+    // Determine the canonical URL - use provided canonicalUrl or construct from baseUrl + pathname
+    const finalCanonicalUrl = canonicalUrl || (baseUrl + location.pathname);
+    const finalOgUrl = baseUrl.includes(location.pathname) ? baseUrl : (baseUrl + location.pathname);
+    
     // Update document title
     document.title = title;
     
@@ -22,7 +30,7 @@ const SEO = ({
     updateMetaTag('og:title', title, 'property');
     updateMetaTag('og:description', description, 'property');
     updateMetaTag('og:image', image, 'property');
-    updateMetaTag('og:url', url + location.pathname, 'property');
+    updateMetaTag('og:url', finalOgUrl, 'property');
     
     // Update Twitter Card tags
     updateMetaTag('twitter:title', title, 'name');
@@ -30,9 +38,9 @@ const SEO = ({
     updateMetaTag('twitter:image', image, 'name');
     
     // Update canonical URL
-    updateCanonicalUrl(url + location.pathname);
+    updateCanonicalUrl(finalCanonicalUrl);
     
-  }, [title, description, keywords, image, url, location.pathname]);
+  }, [title, description, keywords, image, baseUrl, canonicalUrl, location.pathname]);
 
   const updateMetaTag = (name, content, attribute = 'name') => {
     let meta = document.querySelector(`meta[${attribute}="${name}"]`);

@@ -3,6 +3,7 @@ import Pricing from '../components/Pricing';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
+import SITE_CONFIG from '../config/site';
 
 const PricingPage = () => {
   return (
@@ -11,7 +12,7 @@ const PricingPage = () => {
         title="Pricing Plans - InstaFollowCheck"
         description="Choose the perfect plan for your Instagram analytics needs. Start free or upgrade to Premium for advanced features."
         keywords="instagram pricing, instagram analytics pricing, social media tools pricing, instagram followers pricing"
-        url="https://instafollowcheck.com/pricing"
+        canonicalUrl={SITE_CONFIG.getUrl('/pricing')}
       />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <Header />

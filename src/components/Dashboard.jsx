@@ -5,6 +5,8 @@ import apiService from '../services/api.js';
 import Header from './Header';
 import PageNavigation from './PageNavigation';
 import SubscriptionUpgradePrompt from './SubscriptionUpgradePrompt';
+import SEO from './SEO';
+import SITE_CONFIG from '../config/site';
 
 const Dashboard = () => {
   console.log('Dashboard component rendered');
@@ -214,6 +216,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="View Instagram Stories Anonymously | Check Profiles & Activity – InstaFollowCheck"
+        description="View Instagram stories anonymously, check profiles, and track activity effortlessly with InstaFollowCheck. Stay discreet while monitoring accounts."
+        keywords="instagram stories, instagram profile viewer, anonymous instagram, instagram activity tracker"
+        canonicalUrl={SITE_CONFIG.getUrl('/dashboard')}
+      />
       <Header />
       <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
         {/* Header */}

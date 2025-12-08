@@ -7,6 +7,7 @@ import StoriesViewer from '../components/StoriesViewer.jsx';
 import MediaModal from '../components/MediaModal.jsx';
 import SubscriptionUpgradePrompt from '../components/SubscriptionUpgradePrompt.jsx';
 import { useSubscription } from '../contexts/SubscriptionContext';
+import SITE_CONFIG from '../config/site';
 
 const ViewProfile = () => {
   const { getPlanTier } = useSubscription();
@@ -56,7 +57,7 @@ const ViewProfile = () => {
       bio: `Hi, I'm ${handle}. Exploring InstaFollowCheck mock profile. #mock #demo`,
       counts: { posts, followers, following },
       verified: seed % 3 === 0,
-      link: 'https://instafollowcheck.com',
+      link: SITE_CONFIG.getBaseUrl(),
       highlights: Array.from({ length: 8 }).map((_, i) => ({
         id: `hl-${i}`,
         label: i % 2 === 0 ? 'besties' : 'travel',
@@ -526,7 +527,7 @@ const ViewProfile = () => {
         title="View Instagram Profile | InstaFollowCheck"
         description="Enter an Instagram username to view the public profile details."
         keywords="instagram profile viewer, view instagram profile, instagram tools"
-        url="https://instafollowcheck.com/viewprofile"
+        canonicalUrl={SITE_CONFIG.getUrl('/viewprofile')}
       />
       <Header />
       <PageNavigation />

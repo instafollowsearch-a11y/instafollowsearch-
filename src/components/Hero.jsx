@@ -35,8 +35,13 @@ const Hero = () => {
           </h1>
 
           {/* Subtitle */}
-          <p ref={subtitleRef} className={`text-xl md:text-2xl text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-700 ${isSubtitleVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
+          <p ref={subtitleRef} className={`text-xl md:text-2xl text-white/70 mb-3 max-w-3xl mx-auto leading-relaxed transition-all duration-700 ${isSubtitleVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
             Check anyone's recent follows anonymously
+          </p>
+          
+          {/* No login required */}
+          <p className={`text-xl md:text-2xl text-white/70 mb-12 max-w-3xl mx-auto leading-relaxed transition-all duration-700 ${isSubtitleVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`} style={{ transitionDelay: '100ms' }}>
+            No Instagram login required
           </p>
 
           {/* Search form */}

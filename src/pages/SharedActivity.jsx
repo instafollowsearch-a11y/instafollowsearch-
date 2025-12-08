@@ -5,6 +5,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PageNavigation from '../components/PageNavigation';
 import SubscriptionUpgradePrompt from '../components/SubscriptionUpgradePrompt';
+import SEO from '../components/SEO';
+import SITE_CONFIG from '../config/site';
 import apiService from '../services/api.js';
 
 const SharedActivity = () => {
@@ -981,6 +983,12 @@ const SharedActivity = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="Instagram Activity Tracker | Detect Cheating & Analyze Follower Activity – InstaFollowCheck"
+        description="Monitor Instagram activity, detect cheating, and analyze follower interactions with InstaFollowCheck. Get insights into shared activity easily and discreetly."
+        keywords="instagram activity tracker, detect cheating instagram, instagram shared activity, follower analysis"
+        canonicalUrl={SITE_CONFIG.getUrl('/sharedactivity')}
+      />
       <Header />
       <PageNavigation />
       
