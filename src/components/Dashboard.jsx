@@ -233,7 +233,7 @@ const Dashboard = () => {
             </span>
           </h1>
           <p className="text-xl text-white/70">
-            Manage your subscription and track your usage
+            View Instagram Profile and Instagram Stories Anonymously
           </p>
         </div>
 
