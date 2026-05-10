@@ -47,7 +47,7 @@ const SearchResults = ({
     </div>
   );
 
-  const renderScrollableBox = (title, data, isLoading, icon, onLoadMore, isLoadingMore = false, showLoadMore = true) => (
+  const renderScrollableBox = (title, data, isLoading, icon, onLoadMore, isLoadingMore = false, hasNextPage = true, canLoadMore = true) => (
     <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
       <div className="flex items-center mb-4">
         <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mr-3">
@@ -71,7 +71,7 @@ const SearchResults = ({
               {data.map((user, index) => renderUserCard(user, index))}
               
               {/* Load More Button */}
-              {showLoadMore && (
+              {hasNextPage && canLoadMore && (
                 <div className="pt-4 pb-2">
                   <button
                     onClick={onLoadMore}

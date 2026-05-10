@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Header from '../components/Header';
 import PageNavigation from '../components/PageNavigation';
 import SEO from '../components/SEO.jsx';
@@ -8,6 +8,7 @@ import MediaModal from '../components/MediaModal.jsx';
 import SubscriptionUpgradePrompt from '../components/SubscriptionUpgradePrompt.jsx';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import SITE_CONFIG from '../config/site';
+import { mergeUsersInOrder, uniqueUsersInOrder } from '../utils/orderedUsers.js';
 
 const ViewProfile = () => {
   const { getPlanTier } = useSubscription();
@@ -34,38 +35,6 @@ const ViewProfile = () => {
   // Media pagination
   const [mediasNextPageId, setMediasNextPageId] = useState(null);
   const [isLoadingMoreMedias, setIsLoadingMoreMedias] = useState(false);
-
-  const makeMockProfile = (handle) => {
-    const seed = handle.length;
-    const followers = 1200 + seed * 37;
-    const following = 180 + seed * 5;
-    const posts = 42 + (seed % 21);
-    const colors = ['4F46E5','EC4899','10B981','F59E0B','8B5CF6','06B6D4'];
-    const color = colors[seed % colors.length];
-    const initials = handle.slice(0, 2).toUpperCase();
-    const medias = Array.from({ length: 18 }).map((_, i) => ({
-      id: `${handle}-${i}`,
-      thumb: `https://picsum.photos/seed/${handle}-${i}/800/800`,
-      likes: Math.floor(50 + Math.random() * 950),
-      comments: Math.floor(Math.random() * 60)
-    }));
-
-    return {
-      username: handle,
-      fullName: handle.replace(/[_\.]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-      profilePicUrl: `https://picsum.photos/seed/${handle}-avatar/200/200`,
-      bio: `Hi, I'm ${handle}. Exploring InstaFollowCheck mock profile. #mock #demo`,
-      counts: { posts, followers, following },
-      verified: seed % 3 === 0,
-      link: SITE_CONFIG.getBaseUrl(),
-      highlights: Array.from({ length: 8 }).map((_, i) => ({
-        id: `hl-${i}`,
-        label: i % 2 === 0 ? 'besties' : 'travel',
-        cover: `https://picsum.photos/seed/${handle}-hl-${i}/120/120`
-      })),
-      medias
-    };
-  };
 
   const proxy = useCallback((url) => {
     if (!url) return '';
@@ -386,7 +355,7 @@ const ViewProfile = () => {
       setIsLoadingMore(true);
       const response = await apiService.getNextFollowers(Number(profile.userId), followersNextPageId);
       const newFollowers = response?.data?.followers || [];
-      setFollowers(prev => [...prev, ...newFollowers]);
+      setFollowers(prev => mergeUsersInOrder(prev, newFollowers));
       setFollowersNextPageId(response?.data?.nextPageId || null);
     } catch (error) {
       console.error('Failed to load more followers:', error);
@@ -403,7 +372,7 @@ const ViewProfile = () => {
       setIsLoadingMore(true);
       const response = await apiService.getNextFollowing(Number(profile.userId), followingNextPageId);
       const newFollowing = response?.data?.following || [];
-      setFollowing(prev => [...prev, ...newFollowing]);
+      setFollowing(prev => mergeUsersInOrder(prev, newFollowing));
       setFollowingNextPageId(response?.data?.nextPageId || null);
     } catch (error) {
       console.error('Failed to load more following:', error);
@@ -476,11 +445,11 @@ const ViewProfile = () => {
         
         // Set followers and following data
         if (payload.userFollowers) {
-          setFollowers(payload.userFollowers.followers || []);
+          setFollowers(uniqueUsersInOrder(payload.userFollowers.followers || []));
           setFollowersNextPageId(payload.userFollowers.nextPageId || null);
         }
         if (payload.userFollowing) {
-          setFollowing(payload.userFollowing.following || []);
+          setFollowing(uniqueUsersInOrder(payload.userFollowing.following || []));
           setFollowingNextPageId(payload.userFollowing.nextPageId || null);
         }
         
@@ -886,5 +855,3 @@ const ViewProfile = () => {
 };
 
 export default ViewProfile;
-
-

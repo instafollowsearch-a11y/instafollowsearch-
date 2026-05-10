@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import apiService from '../services/api.js';
 import SearchResults from './SearchResults.jsx';
+import { mergeUsersInOrder, uniqueUsersInOrder } from '../utils/orderedUsers.js';
 
 const SearchForm = () => {
   const { isActive, getPlanTier } = useSubscription();
@@ -12,14 +13,15 @@ const SearchForm = () => {
   const [error, setError] = useState('');
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [isLoadingFollowers, setIsLoadingFollowers] = useState(false);
-  const [isLoadingFollowing, setIsLoadingFollowing] = useState(false);
+  const [isLoadingFollowers] = useState(false);
+  const [isLoadingFollowing] = useState(false);
   const [isLoadingMoreFollowers, setIsLoadingMoreFollowers] = useState(false);
   const [isLoadingMoreFollowing, setIsLoadingMoreFollowing] = useState(false);
-  const [followersPage, setFollowersPage] = useState(1);
-  const [followingPage, setFollowingPage] = useState(1);
+  const [, setFollowersPage] = useState(1);
+  const [, setFollowingPage] = useState(1);
   const [followersNextPageId, setFollowersNextPageId] = useState(null);
   const [followingNextPageId, setFollowingNextPageId] = useState(null);
+  const [userId, setUserId] = useState(null);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -39,6 +41,7 @@ const SearchForm = () => {
     setFollowing([]);
     setFollowersNextPageId(null);
     setFollowingNextPageId(null);
+    setUserId(null);
 
     try {
       const response = await apiService.searchInstagram(cleanUsername, searchType);
@@ -51,17 +54,18 @@ const SearchForm = () => {
         ? data.newFollowing
         : (Array.isArray(data?.following) ? data.following : []);
       setResults({ ...data, newFollowers: normalizedNewFollowers, newFollowing: normalizedNewFollowing });
+      setUserId(data?.user?.id || data?.user?.pk || null);
       
       // If user is subscribed, extract followers and following data from the main response
       if (isActive() && data) {
         // Extract followers data
         const followersData = data.followers || data.newFollowers || [];
-        setFollowers(followersData);
+        setFollowers(uniqueUsersInOrder(followersData));
         setFollowersNextPageId(data.nextPageId || data.followersNextPageId || null);
         
         // Extract following data
         const followingData = data.following || data.newFollowing || [];
-        setFollowing(followingData);
+        setFollowing(uniqueUsersInOrder(followingData));
         setFollowingNextPageId(data.nextPageId || data.followingNextPageId || null);
       }
     } catch (err) {
@@ -73,20 +77,18 @@ const SearchForm = () => {
 
 
   const handleLoadMoreFollowers = async () => {
-    if (!username.trim() || isLoadingMoreFollowers || !followersNextPageId) return;
+    if (!userId || isLoadingMoreFollowers || !followersNextPageId) return;
     
     try {
       setIsLoadingMoreFollowers(true);
-      const cleanUsername = username.trim().replace(/^@+/, '');
-      
       // Call the dedicated next-followers endpoint
-      const response = await apiService.getNextFollowers(cleanUsername, followersNextPageId);
+      const response = await apiService.getNextFollowers(userId, followersNextPageId);
       const data = response.data || response;
       
       // Append new followers to existing list
       const newFollowers = data.followers || data.newFollowers || data.followerList || [];
       if (Array.isArray(newFollowers) && newFollowers.length > 0) {
-        setFollowers(prev => [...prev, ...newFollowers]);
+        setFollowers(prev => mergeUsersInOrder(prev, newFollowers));
         setFollowersNextPageId(data.nextPageId || data.followersNextPageId || null);
         setFollowersPage(prev => prev + 1);
       }
@@ -100,20 +102,18 @@ const SearchForm = () => {
   };
 
   const handleLoadMoreFollowing = async () => {
-    if (!username.trim() || isLoadingMoreFollowing || !followingNextPageId) return;
+    if (!userId || isLoadingMoreFollowing || !followingNextPageId) return;
     
     try {
       setIsLoadingMoreFollowing(true);
-      const cleanUsername = username.trim().replace(/^@+/, '');
-      
       // Call the dedicated next-following endpoint
-      const response = await apiService.getNextFollowing(cleanUsername, followingNextPageId);
+      const response = await apiService.getNextFollowing(userId, followingNextPageId);
       const data = response.data || response;
       
       // Append new following to existing list
       const newFollowing = data.following || data.newFollowing || data.followingList || [];
       if (Array.isArray(newFollowing) && newFollowing.length > 0) {
-        setFollowing(prev => [...prev, ...newFollowing]);
+        setFollowing(prev => mergeUsersInOrder(prev, newFollowing));
         setFollowingNextPageId(data.nextPageId || data.followingNextPageId || null);
         setFollowingPage(prev => prev + 1);
       }
