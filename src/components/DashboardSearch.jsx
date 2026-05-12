@@ -8,10 +8,11 @@ import { downloadStory, downloadAllStories } from '../utils/downloadUtils';
 import Header from './Header';
 import PageNavigation from './PageNavigation';
 import SubscriptionUpgradePrompt from './SubscriptionUpgradePrompt';
+import { mergeUsersInOrder, uniqueUsersInOrder } from '../utils/orderedUsers.js';
 
 const DashboardSearch = () => {
   const navigate = useNavigate();
-  const { isActive, getPlanTier, loading: subscriptionLoading } = useSubscription();
+  const { getPlanTier } = useSubscription();
   const { showSuccess, showError, showInfo } = useToast();
   const [username, setUsername] = useState('');
   const [searchType, setSearchType] = useState('both');
@@ -26,12 +27,12 @@ const DashboardSearch = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [isLoadingFollowers, setIsLoadingFollowers] = useState(false);
-  const [isLoadingFollowing, setIsLoadingFollowing] = useState(false);
+  const [isLoadingFollowers] = useState(false);
+  const [isLoadingFollowing] = useState(false);
   const [isLoadingMoreFollowers, setIsLoadingMoreFollowers] = useState(false);
   const [isLoadingMoreFollowing, setIsLoadingMoreFollowing] = useState(false);
-  const [followersPage, setFollowersPage] = useState(1);
-  const [followingPage, setFollowingPage] = useState(1);
+  const [, setFollowersPage] = useState(1);
+  const [, setFollowingPage] = useState(1);
   const [followersNextPageId, setFollowersNextPageId] = useState(null);
   const [followingNextPageId, setFollowingNextPageId] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -158,14 +159,14 @@ const DashboardSearch = () => {
       if (getPlanTier() >= 2 && data) {
         // Extract followers data from the advanced search response
         const followersData = data.followers || data.newFollowers || data.followerList || [];
-        setFollowers(Array.isArray(followersData) ? followersData : []);
+        setFollowers(Array.isArray(followersData) ? uniqueUsersInOrder(followersData) : []);
         // Try multiple possible locations for nextPageId
         const followersNextId = data.followersNextPageId || data.nextFollowersPageId || data.followers?.nextPageId || null;
         setFollowersNextPageId(followersNextId);
         
         // Extract following data from the advanced search response
         const followingData = data.following || data.newFollowing || data.followingList || [];
-        setFollowing(Array.isArray(followingData) ? followingData : []);
+        setFollowing(Array.isArray(followingData) ? uniqueUsersInOrder(followingData) : []);
         const followingNextId = data.followingNextPageId || data.nextFollowingPageId || data.following?.nextPageId || null;
         setFollowingNextPageId(followingNextId);
         
@@ -223,7 +224,7 @@ const DashboardSearch = () => {
       // Append new followers to existing list
       const newFollowers = data.followers || data.newFollowers || data.followerList || [];
       if (Array.isArray(newFollowers) && newFollowers.length > 0) {
-        setFollowers(prev => [...prev, ...newFollowers]);
+        setFollowers(prev => mergeUsersInOrder(prev, newFollowers));
         setFollowersNextPageId(data.nextPageId || data.followersNextPageId || data.nextFollowersPageId || data.followers?.nextPageId || null);
         setFollowersPage(prev => prev + 1);
       }
@@ -249,7 +250,7 @@ const DashboardSearch = () => {
       // Append new following to existing list
       const newFollowing = data.following || data.newFollowing || data.followingList || [];
       if (Array.isArray(newFollowing) && newFollowing.length > 0) {
-        setFollowing(prev => [...prev, ...newFollowing]);
+        setFollowing(prev => mergeUsersInOrder(prev, newFollowing));
         setFollowingNextPageId(data.nextPageId || data.followingNextPageId || data.nextFollowingPageId || data.following?.nextPageId || null);
         setFollowingPage(prev => prev + 1);
       }
@@ -304,7 +305,7 @@ const DashboardSearch = () => {
     }
   };
 
-  const renderUserCard = (user, type = 'user') => {
+  const renderUserCard = (user) => {
     const getInitials = (name) => {
       return name ? name.charAt(0).toUpperCase() : '?';
     };
@@ -647,7 +648,7 @@ const DashboardSearch = () => {
         <div className="max-h-96 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
           {data.length > 0 ? (
             <>
-              {data.map((user, index) => renderUserCard(user, 'user'))}
+              {data.map((user) => renderUserCard(user))}
               
               {/* Load More Button */}
               {hasNextPage && (
